@@ -1,0 +1,12 @@
+# MCP demo：由 McpApplication 读取，加载插件并预创建对象。
+# 运行目录需含 mcp.dll、mcpthreadpool.dll、mcpAppliction.dll 与本文件。
+
+applictionName = "demo_mcplib"
+
+plugins = [
+	"./mcpthreadpool.dll",
+]
+
+[[objects.object]]
+componentID = "cpp.mcp.mcpthreadpool"
+objectName = "demoThreadPool"
