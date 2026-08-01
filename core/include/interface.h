@@ -1,6 +1,6 @@
 ﻿/**
  * @file interface.h
- * @brief 面向外部的核心抽象：消息、消息中心、环境、日志接口及相关常量
+ * @brief 面向外部的核心抽象：消息、消息中心、组件/插件/日志/环境管理接口及相关常量
  * @details 在 componentinfo.h 基础上扩展了协议定义和虚接口；在扩展或集成 PCH 时包含此头文件
  */
 
@@ -447,6 +447,69 @@ public:
 	virtual ErrorCode freeObjectArray(IObjectArray* msg) = 0;
 	/** @brief 查询对象注册名称；未知指针可能返回 nullptr */
 	virtual const char* getObjectName(void* obj) = 0;
+};
+
+
+/**
+ * @brief 已加载插件的信息抽象（宿主/应用框架侧可获取）
+ */
+class IPlugin
+{
+public:
+	virtual const char* getName() = 0;
+	virtual const char* getVersion() = 0;
+	virtual const char* getDescription() = 0;
+	virtual const char* getPath() = 0;
+};
+
+/**
+ * @brief 插件管理器接口：加载/卸载动态插件库
+ */
+class IPluginManager
+{
+public:
+	virtual IPlugin* loadPlugin(const char* path) = 0;
+	virtual ErrorCode unloadPlugin(IPlugin* plugin) = 0;
+};
+
+/**
+ * @brief 组件管理器接口：维护组件注册表
+ */
+class IComponentManager
+{
+public:
+	virtual ErrorCode registerComponent(ComponentInfo* compInfo)     = 0;  // 注册单个组件
+	virtual ErrorCode registerComponents(ComponentInfo** cmptable)   = 0;  // 批量注册组件
+	virtual ErrorCode unregisterComponent(ComponentInfo* compInfo)   = 0;  // 注销单个组件（按信息）
+	virtual ErrorCode unregisterComponents(ComponentInfo** cmptable) = 0;  // 批量注销组件
+	virtual ErrorCode unregisterComponent(const char* componentID)   = 0;  // 注销单个组件（按 ID）
+	virtual ComponentInfo* getComponentInf(const char* componentID)  = 0;  // 按 ID 查询组件信息
+};
+
+/**
+ * @brief 日志管理器接口：默认/具名日志器与后端管理
+ */
+class ILoggerManager
+{
+public:
+	virtual ILogger* getLogger(const char* logName)                                                            = 0;  // 按指定名称获取日志器
+	virtual ILogger* getDefaultLogger()                                                                        = 0;  // 获取默认日志器
+	virtual bool setDefaultLoggerLevel(LogLevel level)                                                      = 0;  // 设置默认日志器级别
+	virtual bool setDefaultLogger(ILoggerWrite* loggerWrite, ILoggerFormat* logFormat = nullptr)               = 0;  // 设置默认日志器输出
+	virtual bool addDefaultLogger(ILoggerWrite* loggerWrite, ILoggerFormat* logFormat = nullptr)               = 0;  // 添加默认日志器输出
+	virtual bool setLoggerLevel(const char* logName, LogLevel level)                                        = 0;  // 设置指定日志器级别
+	virtual bool setLogger(const char* logName, ILoggerWrite* loggerWrite, ILoggerFormat* logFormat = nullptr) = 0;  // 设置指定日志器输出
+	virtual bool addLogger(const char* logName, ILoggerWrite* loggerWrite, ILoggerFormat* logFormat = nullptr) = 0;  // 添加指定日志器输出
+};
+
+/**
+ * @brief 环境变量接口：读取/设置进程环境
+ */
+class IEnvironment
+{
+public:
+	virtual const char* get(const char* key, ErrorCode* errCode = nullptr) = 0;  // 读取环境变量
+	virtual ErrorCode set(const char* key, const char* value)              = 0;  // 设置环境变量
 };
 
 

@@ -5,7 +5,7 @@
  */
 #pragma once
 #include "interface.h"
-#include "internal.h"
+#include "interface.h"
 #include "componentinfo.h"
 #include "coreexport.h"
 #include "plugininfo.h"

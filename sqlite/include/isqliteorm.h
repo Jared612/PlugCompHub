@@ -1,5 +1,5 @@
 ﻿/**
- * @file iSqliteOrm.h
+ * @file isqliteorm.h
  * @brief 鍩轰簬 SQLite 鐨勯敭鍊艰〃 ORM 鎶借薄锛堝崟琛?KV锛夈€? * @details 鍏稿瀷瀹炵幇浣跨敤鍥哄畾 schema 瀛?key/value锛涢€傚悎杞婚噺閰嶇疆鎴栫紦瀛橈紝闈為€氱敤鍏崇郴 ORM銆? */
 #pragma once
 

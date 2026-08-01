@@ -5,17 +5,24 @@ project(pchnetwork)
 
 find_package(Threads REQUIRED)
 
-file(GLOB PCHNETWORK_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-file(GLOB PCHNETWORK_HEADERS
-	"${CMAKE_CURRENT_SOURCE_DIR}/include/*.h"
-	"${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+set(PCHNETWORK_SOURCES
+	src/httpclient.cpp
+	src/websocketclient.cpp
+	src/plugin.cpp
+)
+set(PCHNETWORK_HEADERS
+	src/httpclient.h
+	src/websocketclient.h
+	include/ihttpclient.h
+	include/iwebsocketclient.h
 )
 
 add_library(pchnetwork SHARED ${PCHNETWORK_SOURCES} ${PCHNETWORK_HEADERS})
 
 target_include_directories(pchnetwork
 	PUBLIC
-		"${CMAKE_CURRENT_SOURCE_DIR}/include"
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+		$<INSTALL_INTERFACE:include>
 	PRIVATE
 		"${CMAKE_CURRENT_SOURCE_DIR}/src"
 		"${CMAKE_SOURCE_DIR}/3rdparty/httplib"
@@ -34,9 +41,12 @@ target_link_libraries(pchnetwork
 		ws2_32
 )
 
-set_target_properties(pchnetwork PROPERTIES FOLDER "network")
+set_target_properties(pchnetwork PROPERTIES
+	FOLDER "network"
+	EXPORT_NAME network
+)
 
-install(TARGETS pchnetwork
+install(TARGETS pchnetwork EXPORT PCHTargets
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib

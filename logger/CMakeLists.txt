@@ -1,19 +1,25 @@
 # spdlog-based file logger plugin
 cmake_minimum_required(VERSION 3.10)
 
+project(pchlogger)
+
 find_package(Threads REQUIRED)
 
-file(GLOB LOGGER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-file(GLOB LOGGER_HEADERS
-	"${CMAKE_CURRENT_SOURCE_DIR}/include/*.h"
-	"${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+set(LOGGER_SOURCES
+	src/filelogger.cpp
+	src/plugin.cpp
+)
+set(LOGGER_HEADERS
+	src/filelogger.h
+	include/ifilelogger.h
 )
 
 add_library(pchlogger SHARED ${LOGGER_SOURCES} ${LOGGER_HEADERS})
 
 target_include_directories(pchlogger
 	PUBLIC
-		"${CMAKE_CURRENT_SOURCE_DIR}/include"
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+		$<INSTALL_INTERFACE:include>
 	PRIVATE
 		"${CMAKE_CURRENT_SOURCE_DIR}/src"
 		"${CMAKE_SOURCE_DIR}/3rdparty/spdlog/include"
@@ -27,9 +33,12 @@ target_link_libraries(pchlogger
 		${CMAKE_DL_LIBS}
 )
 
-set_target_properties(pchlogger PROPERTIES FOLDER "logger")
+set_target_properties(pchlogger PROPERTIES
+	FOLDER "logger"
+	EXPORT_NAME logger
+)
 
-install(TARGETS pchlogger
+install(TARGETS pchlogger EXPORT PCHTargets
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib

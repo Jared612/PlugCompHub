@@ -4,7 +4,7 @@
  */
 #pragma once
 #include "configbase.h"
-#include "internal.h"
+#include "interface.h"
 #include "core.h"
 
 namespace pch {

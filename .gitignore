@@ -38,3 +38,8 @@
 # Local IDE configuration
 .cursor/
 .vscode/
+.vs/
+*.user
+
+# CMake user presets
+CMakeUserPresets.json

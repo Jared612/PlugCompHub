@@ -40,7 +40,8 @@ target_compile_definitions(pchapplication PRIVATE APPLICATION_EXPORTS)
 # PUBLIC: after install consumer just links pchapplication and includes include; PRIVATE: impl details and cpptoml compile-time only
 target_include_directories(pchapplication
 	PUBLIC
-		${CMAKE_CURRENT_SOURCE_DIR}/include
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+		$<INSTALL_INTERFACE:include>
 	PRIVATE
 		${CMAKE_CURRENT_SOURCE_DIR}/src
 		${CMAKE_SOURCE_DIR}/3rdparty/cpptoml
@@ -55,9 +56,12 @@ target_link_libraries(pchapplication PRIVATE Threads::Threads ${CMAKE_DL_LIBS})
 # Output name aligned with installed header prefix
 set_target_properties(pchapplication PROPERTIES OUTPUT_NAME "pchapplication")
 
-set_target_properties(pchapplication PROPERTIES FOLDER "application")
+set_target_properties(pchapplication PROPERTIES
+	FOLDER "application"
+	EXPORT_NAME application
+)
 
-install(TARGETS pchapplication
+install(TARGETS pchapplication EXPORT PCHTargets
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib

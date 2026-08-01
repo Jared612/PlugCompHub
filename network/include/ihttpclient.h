@@ -1,5 +1,5 @@
 ﻿/**
- * @file iHttpClient.h
+ * @file ihttpclient.h
  * @brief HTTP 客户端抽象接口（基于异步回调）
  */
 #pragma once

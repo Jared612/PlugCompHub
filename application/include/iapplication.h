@@ -1,5 +1,5 @@
 ﻿/**
- * @file iApplication.h
+ * @file iapplication.h
  * @brief PCH 应用层封装：按配置文件驱动加载插件与预创建对象，并统一启停�? * @details 典型实现解析 TOML，调�?`PluginManager` / `ObjectManager` 等；失败明细通过 `getLoadFailedPluginsInfo` 回溯�? */
 #pragma once
 #include <string>

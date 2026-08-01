@@ -1,5 +1,5 @@
 ﻿/**
- * @file iSqlite.h
+ * @file isqlite.h
  * @brief PCH SQLite 组件对外抽象：打开数据库、执�?SQL、简单标量查询�? * @details 实现通常基于 sqlite3 C API；错误信息通过 `error` 字符串返回给调用方�? */
 #pragma once
 

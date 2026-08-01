@@ -5,7 +5,7 @@
 #include <cstring>
 #include <cstdlib>
 #include "core.h"
-#include "internal.h"
+#include "interface.h"
 
 PCH_BEGIN_NAMESPACE
 

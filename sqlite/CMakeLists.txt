@@ -1,12 +1,21 @@
 # SQLite 扩展：将 amalgamation 的 sqlite3.c 直接编译进本库，避免单独管理第三方预编译库
 cmake_minimum_required(VERSION 3.10)
 
+project(pchsqlite)
+
 find_package(Threads REQUIRED)
 
-file(GLOB PCHSQLITE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-file(GLOB PCHSQLITE_HEADERS
-	"${CMAKE_CURRENT_SOURCE_DIR}/include/*.h"
-	"${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+set(PCHSQLITE_SOURCES
+	src/sqlite.cpp
+	src/sqliteorm.cpp
+	src/plugin.cpp
+)
+set(PCHSQLITE_HEADERS
+	src/sqlite.h
+	src/sqliteorm.h
+	src/kvtabledefine.h
+	include/isqlite.h
+	include/isqliteorm.h
 )
 
 add_library(pchsqlite SHARED
@@ -18,7 +27,8 @@ add_library(pchsqlite SHARED
 
 target_include_directories(pchsqlite
 	PUBLIC
-		"${CMAKE_CURRENT_SOURCE_DIR}/include"
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+		$<INSTALL_INTERFACE:include>
 	PRIVATE
 		"${CMAKE_CURRENT_SOURCE_DIR}/src"
 		"${CMAKE_SOURCE_DIR}/3rdparty/sqlite3/include"
@@ -33,9 +43,12 @@ target_link_libraries(pchsqlite
 		${CMAKE_DL_LIBS}
 )
 
-set_target_properties(pchsqlite PROPERTIES FOLDER "sqlite")
+set_target_properties(pchsqlite PROPERTIES
+	FOLDER "sqlite"
+	EXPORT_NAME sqlite
+)
 
-install(TARGETS pchsqlite
+install(TARGETS pchsqlite EXPORT PCHTargets
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib

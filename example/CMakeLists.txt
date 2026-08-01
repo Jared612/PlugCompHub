@@ -5,7 +5,6 @@ add_executable(example_threadpool
 )
 target_include_directories(example_threadpool PRIVATE
 	"${CMAKE_SOURCE_DIR}/core/include"
-	"${CMAKE_SOURCE_DIR}/core/src"
 	"${CMAKE_SOURCE_DIR}/threadpool/include"
 )
 target_link_libraries(example_threadpool PRIVATE pch)
@@ -16,7 +15,6 @@ add_executable(example_application
 )
 target_include_directories(example_application PRIVATE
 	"${CMAKE_SOURCE_DIR}/core/include"
-	"${CMAKE_SOURCE_DIR}/core/src"
 	"${CMAKE_SOURCE_DIR}/application/include"
 )
 target_link_libraries(example_application PRIVATE pch)
@@ -27,7 +25,6 @@ add_executable(example_net
 )
 target_include_directories(example_net PRIVATE
 	"${CMAKE_SOURCE_DIR}/core/include"
-	"${CMAKE_SOURCE_DIR}/core/src"
 	"${CMAKE_SOURCE_DIR}/network/include"
 )
 target_link_libraries(example_net PRIVATE pch)
@@ -38,7 +35,6 @@ add_executable(example_sqlite
 )
 target_include_directories(example_sqlite PRIVATE
 	"${CMAKE_SOURCE_DIR}/core/include"
-	"${CMAKE_SOURCE_DIR}/core/src"
 	"${CMAKE_SOURCE_DIR}/sqlite/include"
 )
 target_link_libraries(example_sqlite PRIVATE pch)
@@ -49,7 +45,6 @@ add_executable(example_sqlite_orm
 )
 target_include_directories(example_sqlite_orm PRIVATE
 	"${CMAKE_SOURCE_DIR}/core/include"
-	"${CMAKE_SOURCE_DIR}/core/src"
 	"${CMAKE_SOURCE_DIR}/sqlite/include"
 )
 target_link_libraries(example_sqlite_orm PRIVATE pch)
@@ -60,7 +55,6 @@ add_executable(example_logger
 )
 target_include_directories(example_logger PRIVATE
 	"${CMAKE_SOURCE_DIR}/core/include"
-	"${CMAKE_SOURCE_DIR}/core/src"
 	"${CMAKE_SOURCE_DIR}/logger/include"
 )
 target_link_libraries(example_logger PRIVATE pch)

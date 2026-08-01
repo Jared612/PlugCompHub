@@ -9,7 +9,7 @@
  */
 #pragma once
 #include "interface.h"
-#include "internal.h"
+#include "interface.h"
 #include <atomic>
 #include <cstdarg>
 #include <list>
@@ -200,7 +200,7 @@ public:
  * @details
  * 默认日志器名称为 "PCHCore"，构造时挂载 _consoleLogger。
  * _loggerMap 和默认条目的更新受 _mutex 保护。
- * 接口语义与 internal.h 中的 ILoggerManager 一致；handleMessage 详见 loggerManager.cpp。
+ * 接口语义与 interface.h 中的 ILoggerManager 一致；handleMessage 详见 loggerManager.cpp。
  */
 class LoggerManager: public ILoggerManager, public IMessageHandler
 {

@@ -19,8 +19,7 @@
 
 #pragma once
 #include "interface.h"
-#include "internal.h"
-#include "Component.h"
+#include "component.h"
 #include <list>
 #include <mutex>
 #include <string>

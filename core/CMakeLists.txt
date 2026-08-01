@@ -2,42 +2,64 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(pch)
-# Works with coreexport.h __PCH_EXPORTS branch, produces dllexport instead of dllimport
-add_definitions(-D__PCH_EXPORTS)
 
-# Collect implementation and header files; new src files auto-participate in build
-file(GLOB_RECURSE CORE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-file(GLOB_RECURSE CORE_HEADERS
-	"${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+# Explicit source lists: new files must be registered here
+set(CORE_SOURCES
+	src/coreapi.cpp
+	src/coreinit.cpp
+	src/environment.cpp
+	src/loggerManager.cpp
+	src/messagecenter.cpp
+	src/component/componentManager.cpp
+	src/component/objectManager.cpp
+	src/plugin/plugin.cpp
+	src/plugin/pluginManager.cpp
 )
-file(GLOB CORE_PUBLIC_HEADERS
-	"${CMAKE_CURRENT_SOURCE_DIR}/include/*.h"
+set(CORE_HEADERS
+	src/environment.h
+	src/loggerManager.h
+	src/messagecenter.h
+	src/component/component.h
+	src/component/componentManager.h
+	src/component/objectManager.h
+	src/plugin/plugin.h
+	src/plugin/pluginManager.h
+	include/core.h
+	include/interface.h
+	include/error.h
+	include/componentinfo.h
+	include/plugininfo.h
+	include/coreexport.h
 )
-set(CORE_HEADERS ${CORE_HEADERS} ${CORE_PUBLIC_HEADERS})
 
 add_library(${PROJECT_NAME} SHARED ${CORE_SOURCES} ${CORE_HEADERS})
+# Works with coreexport.h __PCH_EXPORTS branch, produces dllexport instead of dllimport
+target_compile_definitions(${PROJECT_NAME} PRIVATE __PCH_EXPORTS)
 # Target filename: pch.dll on Windows, libpch.so / libpch.dylib on Unix
 
-# Build-time visibility: source root + include
-# After install, only expose include dir
-# (internal.h is not installed via install(FILES ...))
+# Build-time visibility: only include/ is PUBLIC; src/ stays PRIVATE so
+# consumers cannot depend on internal implementations.
 target_include_directories(${PROJECT_NAME}
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/plugin>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/component>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/plugin
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/component
 )
 
 # MessageCenter etc. use std::thread; plugin loading needs dlopen on non-Windows
 find_package(Threads)
 target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS})
 
-# Only install public-facing headers (not internal.h). Always generate install rules so VS has INSTALL target.
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "core")
+# Only install public-facing headers; implementation headers stay in src/.
+set_target_properties(${PROJECT_NAME} PROPERTIES
+	FOLDER "core"
+	EXPORT_NAME pch
+)
 
-install(TARGETS ${PROJECT_NAME}
+install(TARGETS ${PROJECT_NAME} EXPORT PCHTargets
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib

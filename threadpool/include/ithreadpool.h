@@ -1,5 +1,5 @@
 ﻿/**
- * @file iThreadPool.h
+ * @file ithreadpool.h
  * @brief PCH 线程池组件对外抽象：固定工作线程 + 任务队列�? * @details 供业务将短任务异步投递；与消息中心异步队列解耦，由集成方选择是否组合使用�? */
 #pragma once
 

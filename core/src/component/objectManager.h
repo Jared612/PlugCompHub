@@ -14,7 +14,7 @@
 #include <vector>
 #include <memory>
 #include "interface.h"
-#include "internal.h"
+#include "interface.h"
 #include "component.h"
 
 PCH_BEGIN_NAMESPACE

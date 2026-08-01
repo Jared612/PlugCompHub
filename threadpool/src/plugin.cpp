@@ -1,5 +1,5 @@
 ﻿#include "threadpool.h"
-#include "internal.h"
+#include "interface.h"
 #include "core.h"
 #include "componentinfo.h"
 

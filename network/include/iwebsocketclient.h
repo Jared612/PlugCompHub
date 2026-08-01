@@ -1,5 +1,5 @@
 ﻿/**
- * @file iWebSocketClient.h
+ * @file iwebsocketclient.h
  * @brief WebSocket 客户端抽象接口（基于异步回调）
  */
 #pragma once

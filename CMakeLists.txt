@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # 解决方案/工程显示名
-project(PlugCompHub)
+project(PlugCompHub VERSION 0.1.0)
 
 # Installation output directory: cmake --install build → dist/bin/ dist/lib/ dist/include/
 set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/dist" CACHE PATH "Install root directory")
@@ -58,6 +58,40 @@ endif()
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/example/CMakeLists.txt")
 	add_subdirectory(example)
+endif()
+
+# ---- 安装包导出：支持消费方 find_package(PCH) ----
+include(CMakePackageConfigHelpers)
+set(PCH_INSTALL_CMAKEDIR lib/cmake/PCH)
+
+install(EXPORT PCHTargets
+	FILE PCHTargets.cmake
+	NAMESPACE PCH::
+	DESTINATION ${PCH_INSTALL_CMAKEDIR}
+)
+
+configure_package_config_file(
+	cmake/PCHConfig.cmake.in
+	${CMAKE_CURRENT_BINARY_DIR}/PCHConfig.cmake
+	INSTALL_DESTINATION ${PCH_INSTALL_CMAKEDIR}
+)
+
+write_basic_package_version_file(
+	${CMAKE_CURRENT_BINARY_DIR}/PCHConfigVersion.cmake
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+	${CMAKE_CURRENT_BINARY_DIR}/PCHConfig.cmake
+	${CMAKE_CURRENT_BINARY_DIR}/PCHConfigVersion.cmake
+	DESTINATION ${PCH_INSTALL_CMAKEDIR}
+)
+
+# ---- 测试 ----
+include(CTest)
+if(BUILD_TESTING)
+	add_subdirectory(tests)
 endif()
 
 # IDE 中按文件夹组织目标（主要影响 Visual Studio 生成器）
