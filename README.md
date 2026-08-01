@@ -16,12 +16,13 @@ PlugCompHub（简称 PCH）是一个微内核式 C++ 插件组件平台：宿主
 ```text
 PlugCompHub/
 ├── core/          # 核心运行时（pch）
-├── network/       # 网络插件（pchnetwork）
-├── logger/        # 文件日志插件（pchlogger）
-├── sqlite/        # SQLite 插件（pchsqlite）
-├── threadpool/    # 线程池插件（pchthreadpool）
+├── plugins/       # 可选插件
+│   ├── network/   #   网络插件（pchnetwork）
+│   ├── logger/    #   文件日志插件（pchlogger）
+│   ├── sqlite/    #   SQLite 插件（pchsqlite）
+│   └── threadpool/#   线程池插件（pchthreadpool）
 ├── application/   # 应用骨架插件（pchapplication）
-├── example/       # 示例程序
+├── examples/      # 示例程序
 ├── tests/         # CTest 冒烟测试
 ├── docs/          # 功能规范与历史分析
 └── 3rdparty/      # vendored 第三方依赖

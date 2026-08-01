@@ -4,15 +4,15 @@ cmake_minimum_required(VERSION 3.10)
 add_executable(pch_core_smoke core_smoke_test.cpp)
 target_include_directories(pch_core_smoke PRIVATE
 	"${CMAKE_SOURCE_DIR}/core/include"
-	"${CMAKE_SOURCE_DIR}/example"
+	"${CMAKE_SOURCE_DIR}/examples"
 )
 target_link_libraries(pch_core_smoke PRIVATE pch)
 
 add_executable(pch_plugin_smoke plugin_smoke_test.cpp)
 target_include_directories(pch_plugin_smoke PRIVATE
 	"${CMAKE_SOURCE_DIR}/core/include"
-	"${CMAKE_SOURCE_DIR}/threadpool/include"
-	"${CMAKE_SOURCE_DIR}/example"
+	"${CMAKE_SOURCE_DIR}/plugins/threadpool/include"
+	"${CMAKE_SOURCE_DIR}/examples"
 )
 target_link_libraries(pch_plugin_smoke PRIVATE pch)
 

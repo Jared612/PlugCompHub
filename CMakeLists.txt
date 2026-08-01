@@ -35,29 +35,17 @@ endif()
 # 必选：pch 核心动态库
 add_subdirectory(core)
 
-# 以下为可选组件：目录或 CMakeLists 不存在时跳过，避免最小检出无法配置
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/threadpool/CMakeLists.txt")
-	add_subdirectory(threadpool)
-endif()
-
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/network/CMakeLists.txt")
-	add_subdirectory(network)
-endif()
-
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/logger/CMakeLists.txt")
-	add_subdirectory(logger)
-endif()
-
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/sqlite/CMakeLists.txt")
-	add_subdirectory(sqlite)
+# 可选插件：统一放在 plugins/ 下，目录或 CMakeLists 不存在时跳过，避免最小检出无法配置
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/plugins/CMakeLists.txt")
+	add_subdirectory(plugins)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/application/CMakeLists.txt")
 	add_subdirectory(application)
 endif()
 
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/example/CMakeLists.txt")
-	add_subdirectory(example)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/examples/CMakeLists.txt")
+	add_subdirectory(examples)
 endif()
 
 # ---- 安装包导出：支持消费方 find_package(PCH) ----

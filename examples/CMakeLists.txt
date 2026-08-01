@@ -5,7 +5,7 @@ add_executable(example_threadpool
 )
 target_include_directories(example_threadpool PRIVATE
 	"${CMAKE_SOURCE_DIR}/core/include"
-	"${CMAKE_SOURCE_DIR}/threadpool/include"
+	"${CMAKE_SOURCE_DIR}/plugins/threadpool/include"
 )
 target_link_libraries(example_threadpool PRIVATE pch)
 set_property(TARGET example_threadpool PROPERTY FOLDER "example")
@@ -25,7 +25,7 @@ add_executable(example_net
 )
 target_include_directories(example_net PRIVATE
 	"${CMAKE_SOURCE_DIR}/core/include"
-	"${CMAKE_SOURCE_DIR}/network/include"
+	"${CMAKE_SOURCE_DIR}/plugins/network/include"
 )
 target_link_libraries(example_net PRIVATE pch)
 set_property(TARGET example_net PROPERTY FOLDER "example")
@@ -35,7 +35,7 @@ add_executable(example_sqlite
 )
 target_include_directories(example_sqlite PRIVATE
 	"${CMAKE_SOURCE_DIR}/core/include"
-	"${CMAKE_SOURCE_DIR}/sqlite/include"
+	"${CMAKE_SOURCE_DIR}/plugins/sqlite/include"
 )
 target_link_libraries(example_sqlite PRIVATE pch)
 set_property(TARGET example_sqlite PROPERTY FOLDER "example")
@@ -45,7 +45,7 @@ add_executable(example_sqlite_orm
 )
 target_include_directories(example_sqlite_orm PRIVATE
 	"${CMAKE_SOURCE_DIR}/core/include"
-	"${CMAKE_SOURCE_DIR}/sqlite/include"
+	"${CMAKE_SOURCE_DIR}/plugins/sqlite/include"
 )
 target_link_libraries(example_sqlite_orm PRIVATE pch)
 set_property(TARGET example_sqlite_orm PROPERTY FOLDER "example")
@@ -55,7 +55,7 @@ add_executable(example_logger
 )
 target_include_directories(example_logger PRIVATE
 	"${CMAKE_SOURCE_DIR}/core/include"
-	"${CMAKE_SOURCE_DIR}/logger/include"
+	"${CMAKE_SOURCE_DIR}/plugins/logger/include"
 )
 target_link_libraries(example_logger PRIVATE pch)
 set_property(TARGET example_logger PROPERTY FOLDER "example")
