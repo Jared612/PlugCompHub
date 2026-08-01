@@ -11,14 +11,14 @@ set(LOGGER_SOURCES
 )
 set(LOGGER_HEADERS
 	src/filelogger.h
-	include/ifilelogger.h
+	${CMAKE_SOURCE_DIR}/include/pch/logger/ifilelogger.h
 )
 
 add_library(pchlogger SHARED ${LOGGER_SOURCES} ${LOGGER_HEADERS})
 
 target_include_directories(pchlogger
 	PUBLIC
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/pch>
 		$<INSTALL_INTERFACE:include>
 	PRIVATE
 		"${CMAKE_CURRENT_SOURCE_DIR}/src"
@@ -44,6 +44,6 @@ install(TARGETS pchlogger EXPORT PCHTargets
 	ARCHIVE DESTINATION lib
 )
 install(FILES
-	include/ifilelogger.h
-	DESTINATION include
+	${CMAKE_SOURCE_DIR}/include/pch/logger/ifilelogger.h
+	DESTINATION include/logger
 )

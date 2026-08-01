@@ -1,6 +1,6 @@
-#include "core.h"
-#include "ifilelogger.h"
-#include "interface.h"
+#include "core/core.h"
+#include "logger/ifilelogger.h"
+#include "core/interface.h"
 #include "example_common.h"
 
 #include <iostream>

@@ -1,7 +1,7 @@
-﻿#include "core.h"
-#include "interface.h"
-#include "ihttpclient.h"
-#include "iwebsocketclient.h"
+#include "core/core.h"
+#include "core/interface.h"
+#include "network/ihttpclient.h"
+#include "network/iwebsocketclient.h"
 #include "example_common.h"
 
 #include <iostream>

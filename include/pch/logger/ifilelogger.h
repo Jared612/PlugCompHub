@@ -3,7 +3,7 @@
  * @brief 文件日志接口：扩展 ILoggerWrite，增加路径和级别管理
  */
 #pragma once
-#include "interface.h"
+#include "core/interface.h"
 #include <string>
 
 PCH_BEGIN_NAMESPACE

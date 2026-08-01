@@ -1,6 +1,6 @@
-#include "core.h"
-#include "componentinfo.h"
-#include "interface.h"
+#include "core/core.h"
+#include "core/componentinfo.h"
+#include "core/interface.h"
 #include "example_common.h"
 
 #include <cstdio>

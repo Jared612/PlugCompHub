@@ -4,8 +4,8 @@
 #include <memory>
 #include <cstring>
 #include <cstdlib>
-#include "core.h"
-#include "interface.h"
+#include "core/core.h"
+#include "core/interface.h"
 
 PCH_BEGIN_NAMESPACE
 

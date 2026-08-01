@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "isqlite.h"
+#include "sqlite/isqlite.h"
 
 #include <mutex>
 #include <string>

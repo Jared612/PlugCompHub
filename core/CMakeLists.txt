@@ -24,12 +24,12 @@ set(CORE_HEADERS
 	src/component/objectManager.h
 	src/plugin/plugin.h
 	src/plugin/pluginManager.h
-	include/core.h
-	include/interface.h
-	include/error.h
-	include/componentinfo.h
-	include/plugininfo.h
-	include/coreexport.h
+	${CMAKE_SOURCE_DIR}/include/pch/core/core.h
+	${CMAKE_SOURCE_DIR}/include/pch/core/interface.h
+	${CMAKE_SOURCE_DIR}/include/pch/core/error.h
+	${CMAKE_SOURCE_DIR}/include/pch/core/componentinfo.h
+	${CMAKE_SOURCE_DIR}/include/pch/core/plugininfo.h
+	${CMAKE_SOURCE_DIR}/include/pch/core/coreexport.h
 )
 
 add_library(${PROJECT_NAME} SHARED ${CORE_SOURCES} ${CORE_HEADERS})
@@ -41,12 +41,13 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE __PCH_EXPORTS)
 # consumers cannot depend on internal implementations.
 target_include_directories(${PROJECT_NAME}
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/pch>
         $<INSTALL_INTERFACE:include>
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}/src/plugin
         ${CMAKE_CURRENT_SOURCE_DIR}/src/component
+        ${CMAKE_SOURCE_DIR}/include/pch/core
 )
 
 # MessageCenter etc. use std::thread; plugin loading needs dlopen on non-Windows
@@ -66,11 +67,16 @@ install(TARGETS ${PROJECT_NAME} EXPORT PCHTargets
 )
 
 install(FILES
-	include/core.h
-	include/interface.h
-	include/error.h
-	include/componentinfo.h
-	include/plugininfo.h
-	include/coreexport.h
+	${CMAKE_SOURCE_DIR}/include/pch/core/core.h
+	${CMAKE_SOURCE_DIR}/include/pch/core/interface.h
+	${CMAKE_SOURCE_DIR}/include/pch/core/error.h
+	${CMAKE_SOURCE_DIR}/include/pch/core/componentinfo.h
+	${CMAKE_SOURCE_DIR}/include/pch/core/plugininfo.h
+	${CMAKE_SOURCE_DIR}/include/pch/core/coreexport.h
+	DESTINATION include/core
+)
+
+install(FILES
+	${CMAKE_SOURCE_DIR}/include/pch/pch.h
 	DESTINATION include
 )

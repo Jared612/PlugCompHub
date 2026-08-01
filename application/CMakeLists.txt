@@ -40,7 +40,7 @@ target_compile_definitions(pchapplication PRIVATE APPLICATION_EXPORTS)
 # PUBLIC: after install consumer just links pchapplication and includes include; PRIVATE: impl details and cpptoml compile-time only
 target_include_directories(pchapplication
 	PUBLIC
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/pch>
 		$<INSTALL_INTERFACE:include>
 	PRIVATE
 		${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -67,6 +67,6 @@ install(TARGETS pchapplication EXPORT PCHTargets
 	ARCHIVE DESTINATION lib
 )
 install(FILES
-	include/iapplication.h
-	DESTINATION include
+	${CMAKE_SOURCE_DIR}/include/pch/application/iapplication.h
+	DESTINATION include/application
 )

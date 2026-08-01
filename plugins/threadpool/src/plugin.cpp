@@ -1,7 +1,7 @@
 ﻿#include "threadpool.h"
-#include "interface.h"
-#include "core.h"
-#include "componentinfo.h"
+#include "core/interface.h"
+#include "core/core.h"
+#include "core/componentinfo.h"
 
 PCH_REGISTER_COMPONENT(pch::ThreadPool, "cpp.pch.threadpool")
 

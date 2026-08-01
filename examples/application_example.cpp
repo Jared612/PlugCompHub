@@ -1,6 +1,6 @@
-﻿#include "core.h"
-#include "interface.h"
-#include "iapplication.h"
+#include "core/core.h"
+#include "core/interface.h"
+#include "application/iapplication.h"
 #include "example_common.h"
 
 #include <iostream>

@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "../include/iapplication.h"
+#include "application/iapplication.h"
 #include "appskeleton.h"
 
 namespace pch {

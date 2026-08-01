@@ -4,7 +4,7 @@
  */
 #pragma once
 
-#include "interface.h"
+#include "core/interface.h"
 #include <string>
 #include <vector>
 

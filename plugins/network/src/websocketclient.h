@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "iwebsocketclient.h"
+#include "network/iwebsocketclient.h"
 #include "httplib.h"
 #include <atomic>
 #include <memory>

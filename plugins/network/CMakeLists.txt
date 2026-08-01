@@ -13,15 +13,15 @@ set(PCHNETWORK_SOURCES
 set(PCHNETWORK_HEADERS
 	src/httpclient.h
 	src/websocketclient.h
-	include/ihttpclient.h
-	include/iwebsocketclient.h
+	${CMAKE_SOURCE_DIR}/include/pch/network/ihttpclient.h
+	${CMAKE_SOURCE_DIR}/include/pch/network/iwebsocketclient.h
 )
 
 add_library(pchnetwork SHARED ${PCHNETWORK_SOURCES} ${PCHNETWORK_HEADERS})
 
 target_include_directories(pchnetwork
 	PUBLIC
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/pch>
 		$<INSTALL_INTERFACE:include>
 	PRIVATE
 		"${CMAKE_CURRENT_SOURCE_DIR}/src"
@@ -53,7 +53,7 @@ install(TARGETS pchnetwork EXPORT PCHTargets
 )
 
 install(FILES
-	include/ihttpclient.h
-	include/iwebsocketclient.h
-	DESTINATION include
+	${CMAKE_SOURCE_DIR}/include/pch/network/ihttpclient.h
+	${CMAKE_SOURCE_DIR}/include/pch/network/iwebsocketclient.h
+	DESTINATION include/network
 )

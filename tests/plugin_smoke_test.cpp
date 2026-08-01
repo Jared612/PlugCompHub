@@ -1,7 +1,7 @@
-#include "core.h"
-#include "componentinfo.h"
-#include "interface.h"
-#include "ithreadpool.h"
+#include "core/core.h"
+#include "core/componentinfo.h"
+#include "core/interface.h"
+#include "threadpool/ithreadpool.h"
 #include "example_common.h"
 
 #include <atomic>

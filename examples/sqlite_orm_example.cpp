@@ -1,6 +1,6 @@
-﻿#include "core.h"
-#include "interface.h"
-#include "isqliteorm.h"
+#include "core/core.h"
+#include "core/interface.h"
+#include "sqlite/isqliteorm.h"
 #include "example_common.h"
 
 #include <iostream>

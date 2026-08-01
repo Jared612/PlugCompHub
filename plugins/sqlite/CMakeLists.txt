@@ -14,8 +14,8 @@ set(PCHSQLITE_HEADERS
 	src/sqlite.h
 	src/sqliteorm.h
 	src/kvtabledefine.h
-	include/isqlite.h
-	include/isqliteorm.h
+	${CMAKE_SOURCE_DIR}/include/pch/sqlite/isqlite.h
+	${CMAKE_SOURCE_DIR}/include/pch/sqlite/isqliteorm.h
 )
 
 add_library(pchsqlite SHARED
@@ -27,7 +27,7 @@ add_library(pchsqlite SHARED
 
 target_include_directories(pchsqlite
 	PUBLIC
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/pch>
 		$<INSTALL_INTERFACE:include>
 	PRIVATE
 		"${CMAKE_CURRENT_SOURCE_DIR}/src"
@@ -55,7 +55,7 @@ install(TARGETS pchsqlite EXPORT PCHTargets
 )
 
 install(FILES
-	include/isqlite.h
-	include/isqliteorm.h
-	DESTINATION include
+	${CMAKE_SOURCE_DIR}/include/pch/sqlite/isqlite.h
+	${CMAKE_SOURCE_DIR}/include/pch/sqlite/isqliteorm.h
+	DESTINATION include/sqlite
 )

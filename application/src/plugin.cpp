@@ -1,6 +1,6 @@
-﻿#include "application.h"
-#include "componentinfo.h"
-#include "plugininfo.h"
+#include "application.h"
+#include "core/componentinfo.h"
+#include "core/plugininfo.h"
 
 PCH_REGISTER_COMPONENT(pch::Application, "cpp.pch.application")
 

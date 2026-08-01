@@ -1,6 +1,6 @@
-﻿#include "componentinfo.h"
-#include "core.h"
-#include "plugininfo.h"
+#include "core/componentinfo.h"
+#include "core/core.h"
+#include "core/plugininfo.h"
 
 #include "httpclient.h"
 #include "websocketclient.h"

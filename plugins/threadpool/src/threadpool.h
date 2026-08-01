@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "ithreadpool.h"
+#include "threadpool/ithreadpool.h"
 
 #include <atomic>
 #include <condition_variable>

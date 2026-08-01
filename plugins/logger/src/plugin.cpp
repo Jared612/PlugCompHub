@@ -1,7 +1,7 @@
 ﻿#include "filelogger.h"
-#include "core.h"
-#include "componentinfo.h"
-#include "plugininfo.h"
+#include "core/core.h"
+#include "core/componentinfo.h"
+#include "core/plugininfo.h"
 
 PCH_REGISTER_COMPONENT(pch::FileLogger, "cpp.pch.filelogger")
 

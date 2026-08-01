@@ -11,14 +11,14 @@ set(THREADPOOL_SOURCES
 )
 set(THREADPOOL_HEADERS
 	src/threadpool.h
-	include/ithreadpool.h
+	${CMAKE_SOURCE_DIR}/include/pch/threadpool/ithreadpool.h
 )
 
 add_library(pchthreadpool SHARED ${THREADPOOL_SOURCES} ${THREADPOOL_HEADERS})
 
 target_include_directories(pchthreadpool
 	PUBLIC
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/pch>
 		$<INSTALL_INTERFACE:include>
 	PRIVATE
 		"${CMAKE_CURRENT_SOURCE_DIR}/src"
@@ -43,6 +43,6 @@ install(TARGETS pchthreadpool EXPORT PCHTargets
 	ARCHIVE DESTINATION lib
 )
 install(FILES
-	include/ithreadpool.h
-	DESTINATION include
+	${CMAKE_SOURCE_DIR}/include/pch/threadpool/ithreadpool.h
+	DESTINATION include/threadpool
 )
