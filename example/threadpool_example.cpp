@@ -1,6 +1,6 @@
-#include "pcx.h"
+﻿#include "core.h"
 #include "pluginManager.h"
-#include "ipcxthreadpool.h"
+#include "ithreadpool.h"
 
 #include <atomic>
 #include <chrono>
@@ -28,18 +28,18 @@ static std::string joinPath(const std::string& d, const char* f) { return d + "/
 int main()
 {
 	const std::string dir = exeDir();
-	if (pcx::api::Initialize(joinPath(dir, "pcx.dll").c_str()) != PCX_SUCCESS) {
+	if (pch::api::Initialize(joinPath(dir, "PCH.dll").c_str()) != PCH_SUCCESS) {
 		std::cerr << "initialize failed\n";
 		return 1;
 	}
 
-	auto* pm = static_cast<pcx::PluginManager*>(pcx::api::FindObject(PCX_DEFAULT_PLUGINMANAGER));
-	if (pm == nullptr || pm->loadPlugin(joinPath(dir, "pcxthreadpool.dll").c_str()) == nullptr) {
-		std::cerr << "load pcxthreadpool plugin failed\n";
+	auto* pm = static_cast<pch::PluginManager*>(pch::api::FindObject(PCH_DEFAULT_PLUGINMANAGER));
+	if (pm == nullptr || pm->loadPlugin(joinPath(dir, "pchthreadpool.dll").c_str()) == nullptr) {
+		std::cerr << "load pchthreadpool plugin failed\n";
 		return 1;
 	}
 
-	auto* tp = static_cast<pcx::IPcxThreadPool*>(pcx::api::CreateNamedObject("cpp.pcx.threadpool", "example.tp"));
+	auto* tp = static_cast<pch::IThreadPool*>(pch::api::CreateNamedObject("cpp.pch.threadpool", "example.tp"));
 	if (tp == nullptr) {
 		std::cerr << "create threadpool object failed\n";
 		return 1;
@@ -60,6 +60,6 @@ int main()
 	tp->stop();
 
 	std::cout << "threadpool example ok, done=" << done.load() << "\n";
-	pcx::api::Terminate();
+	pch::api::Terminate();
 	return 0;
 }

@@ -1,8 +1,11 @@
-# 顶层工程：聚合 pcx 核心与多个可选扩展子目录；不直接定义库目标。
+# 顶层工程：聚合 pch 核心与多个可选扩展子目录；不直接定义库目标。
 cmake_minimum_required(VERSION 3.10)
 
-# 解决方案/工程显示名；实际核心库目标名在 pcxcore 子目录中定义为 `pcx`
-project(pcxCore)
+# 解决方案/工程显示名
+project(PlugCompHub)
+
+# Installation output directory: cmake --install build → dist/bin/ dist/lib/ dist/include/
+set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/dist" CACHE PATH "Install root directory")
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -29,32 +32,28 @@ else()
 	set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 endif()
 
-# 必选：PCX 核心动态库
-add_subdirectory(pcxcore)
+# 必选：pch 核心动态库
+add_subdirectory(core)
 
 # 以下为可选组件：目录或 CMakeLists 不存在时跳过，避免最小检出无法配置
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/threadpool/CMakeLists.txt")
 	add_subdirectory(threadpool)
 endif()
 
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/pcxthreadpool/CMakeLists.txt")
-	add_subdirectory(pcxthreadpool)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/network/CMakeLists.txt")
+	add_subdirectory(network)
 endif()
 
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/pcxnet/CMakeLists.txt")
-	add_subdirectory(pcxnet)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/logger/CMakeLists.txt")
+	add_subdirectory(logger)
 endif()
 
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/pcxsqlite/CMakeLists.txt")
-	add_subdirectory(pcxsqlite)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/sqlite/CMakeLists.txt")
+	add_subdirectory(sqlite)
 endif()
 
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/pcxapplication/CMakeLists.txt")
-	add_subdirectory(pcxapplication)
-endif()
-
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/demo_pcxlib/CMakeLists.txt")
-	add_subdirectory(demo_pcxlib)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/application/CMakeLists.txt")
+	add_subdirectory(application)
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/example/CMakeLists.txt")

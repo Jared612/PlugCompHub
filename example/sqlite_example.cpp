@@ -1,6 +1,6 @@
-#include "pcx.h"
+﻿#include "core.h"
 #include "pluginManager.h"
-#include "ipcxsqlite.h"
+#include "isqlite.h"
 
 #include <iostream>
 #include <string>
@@ -25,18 +25,18 @@ static std::string joinPath(const std::string& d, const char* f) { return d + "/
 int main()
 {
 	const std::string dir = exeDir();
-	if (pcx::api::Initialize(joinPath(dir, "pcx.dll").c_str()) != PCX_SUCCESS) {
+	if (pch::api::Initialize(joinPath(dir, "PCH.dll").c_str()) != PCH_SUCCESS) {
 		std::cerr << "initialize failed\n";
 		return 1;
 	}
 
-	auto* pm = static_cast<pcx::PluginManager*>(pcx::api::FindObject(PCX_DEFAULT_PLUGINMANAGER));
-	if (pm == nullptr || pm->loadPlugin(joinPath(dir, "pcxsqlite.dll").c_str()) == nullptr) {
-		std::cerr << "load pcxsqlite plugin failed\n";
+	auto* pm = static_cast<pch::PluginManager*>(pch::api::FindObject(PCH_DEFAULT_PLUGINMANAGER));
+	if (pm == nullptr || pm->loadPlugin(joinPath(dir, "pchsqlite.dll").c_str()) == nullptr) {
+		std::cerr << "load pchsqlite plugin failed\n";
 		return 1;
 	}
 
-	auto* db = static_cast<pcx::IPcxSqlite*>(pcx::api::CreateNamedObject("cpp.pcx.sqlite", "example.sqlite"));
+	auto* db = static_cast<pch::ISqlite*>(pch::api::CreateNamedObject("cpp.pch.sqlite", "example.sqlite"));
 	if (db == nullptr) {
 		std::cerr << "create sqlite object failed\n";
 		return 1;
@@ -70,7 +70,7 @@ int main()
 	}
 
 	db->close();
-	pcx::api::Terminate();
+	pch::api::Terminate();
 	std::cout << "sqlite example ok\n";
 	return 0;
 }

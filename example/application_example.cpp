@@ -1,6 +1,6 @@
-#include "pcx.h"
+﻿#include "core.h"
 #include "pluginManager.h"
-#include "ipcxapplication.h"
+#include "iApplication.h"
 
 #include <iostream>
 #include <string>
@@ -26,18 +26,18 @@ static std::string joinPath(const std::string& d, const char* f) { return d + "/
 int main()
 {
 	const std::string dir = exeDir();
-	if (pcx::api::Initialize(joinPath(dir, "pcx.dll").c_str()) != PCX_SUCCESS) {
+	if (pch::api::Initialize(joinPath(dir, "PCH.dll").c_str()) != PCH_SUCCESS) {
 		std::cerr << "initialize failed\n";
 		return 1;
 	}
 
-	auto* pm = static_cast<pcx::PluginManager*>(pcx::api::FindObject(PCX_DEFAULT_PLUGINMANAGER));
-	if (pm == nullptr || pm->loadPlugin(joinPath(dir, "pcxapplication.dll").c_str()) == nullptr) {
-		std::cerr << "load pcxapplication plugin failed\n";
+	auto* pm = static_cast<pch::PluginManager*>(pch::api::FindObject(PCH_DEFAULT_PLUGINMANAGER));
+	if (pm == nullptr || pm->loadPlugin(joinPath(dir, "pchapplication.dll").c_str()) == nullptr) {
+		std::cerr << "load pchapplication plugin failed\n";
 		return 1;
 	}
 
-	auto* app = static_cast<pcx::IPcxApplication*>(pcx::api::CreateNamedObject("cpp.pcx.application", "example.app"));
+	auto* app = static_cast<pch::IApplication*>(pch::api::CreateNamedObject("cpp.pch.application", "example.app"));
 	if (app == nullptr) {
 		std::cerr << "create application object failed\n";
 		return 1;
@@ -48,6 +48,6 @@ int main()
 	std::cout << "application example ok, badPlugins=" << badPlugins.size()
 	          << ", badObjects=" << badObjects.size() << "\n";
 
-	pcx::api::Terminate();
+	pch::api::Terminate();
 	return 0;
 }
