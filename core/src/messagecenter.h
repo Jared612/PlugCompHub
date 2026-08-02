@@ -142,9 +142,8 @@ public:
 	 * @param[in] dstNodeID 目标节点，0 表示本进程
 	 * @param[in] timeout 超时时间（毫秒），供远程路径使用
 	 * @return PCH_SUCCESS 或错误码
-	 * @note 同步分发使用目标对象的裸指针，调用方须保证分发期间目标对象不会被并发
-	 *       deleteObject / tearDown；否则可能触发悬垂指针访问（与异步路径不同，
-	 *       异步路径已按名称二次解析规避该问题）
+	 * @note 分发期间目标对象持有 in-use 计数：并发 deleteObject 会被标记为待删除，
+	 *       实际销毁延迟到本调用结束后，避免悬垂指针访问
 	 */
 	virtual ErrorCode sendMessage(const char* target, IMessage*& request, IMessage** response,  uint32_t dstNodeID = 0, uint32_t timeout = 0) override;
 
@@ -225,7 +224,7 @@ public:
 	 * @param[in] msgPolicy 顺序和错误策略
 	 * @param[in] timeout 保留（当前实现未使用）
 	 * @return PCH_SUCCESS 或错误码
-	 * @note 同 sendMessage：同步分发期间目标对象不得被并发删除
+	 * @note 同 sendMessage：遍历分发期间所有目标持有 in-use 计数，删除操作被延迟到分发结束
 	 */
 	virtual ErrorCode broadcastLocalMessage(IMessage* &message, uint32_t msgPolicy = DefaultMsgPolic, uint32_t timeout = 0) override;
 

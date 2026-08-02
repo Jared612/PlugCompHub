@@ -160,7 +160,13 @@ void* ObjectManager::createNamedObject(const char* componentID, const char* objN
 	// 如果提供初始化消息，通过消息中心直接投递给目标对象
 	// 注意：不再假设 initMsg 是本实现的 Message 实例；消息码由调用方在 allocMessage 时设置
 	if (initMsg && _msgCenter) {
+		// 分发初始化消息期间保留对象，避免并发 deleteObject 造成 UAF
+		{
+			std::lock_guard<std::recursive_mutex> lk(_mutex);
+			objInfo->_inUse++;
+		}
 		ErrorCode err = _msgCenter->invokeHandler(objInfo, initMsg, nullptr);
+		releaseObject(objInfo);
 		if (errCode != nullptr)
 			*errCode = err;
 	}
@@ -241,7 +247,13 @@ void* ObjectManager::createObject(const char* componentID, IMessage* initMsg, Er
 
 	// 如果提供初始化消息，分发给对象（消息码由调用方在 allocMessage 时设置）
 	if (initMsg && _msgCenter) {
+		// 分发初始化消息期间保留对象，避免并发 deleteObject 造成 UAF
+		{
+			std::lock_guard<std::recursive_mutex> lk(_mutex);
+			objInfo->_inUse++;
+		}
 		ErrorCode err = _msgCenter->invokeHandler(objInfo, initMsg, nullptr);
+		releaseObject(objInfo);
 		if (errCode != nullptr)
 			*errCode = err;
 	}
@@ -382,6 +394,7 @@ ErrorCode ObjectManager::deleteObjectByName(const char* objName)
 	}
 
 	ObjectInfo* objInfo = nullptr;
+	bool deferred = false;
 	{
 		std::lock_guard<std::recursive_mutex> lk(_mutex);
 
@@ -409,11 +422,20 @@ ErrorCode ObjectManager::deleteObjectByName(const char* objName)
 		if (itv != _regObjs.end()) {
 			_regObjs.erase(itv);
 		}
+
+		// 使用中：标记待删除，等最后一个使用者 releaseObject 时实际销毁
+		if (objInfo->_inUse > 0) {
+			objInfo->_pendingDelete = true;
+			_pendingDeleteObjs.push_back(objInfo);
+			deferred = true;
+		}
 	}
 
-	WriteLog(LogLevel::Trace, "Object [%s] deleted", objName);
-	// 已从所有索引/列表中移除，直接销毁对象和 ObjectInfo
-	deleteObjInfo(objInfo);
+	WriteLog(LogLevel::Trace, "Object [%s] deleted%s", objName, deferred ? " (deferred)" : "");
+	// 已从所有索引/列表中移除；未在使用中则直接销毁对象和 ObjectInfo
+	if (!deferred) {
+		deleteObjInfo(objInfo);
+	}
 
 	return PCH_SUCCESS;
 }
@@ -487,6 +509,14 @@ void ObjectManager::tearDown()
 	}
 	_regObjsMap.swap(keepByName);
 	_regObjAddrMap.swap(keepByAddr);
+
+	// 清理等待延迟删除的对象（框架退出：无论是否仍在使用，直接销毁）
+	for (auto* oi : _pendingDeleteObjs) {
+		if (oi) {
+			deleteObjInfo(oi);
+		}
+	}
+	_pendingDeleteObjs.clear();
 }
 
 /**
@@ -507,6 +537,7 @@ ErrorCode ObjectManager::deleteObject(void* obj, const char* file, int line)
 	}
 
 	ObjectInfo* objInfo = nullptr;
+	bool deferred = false;
 	{
 		std::lock_guard<std::recursive_mutex> lk(_mutex);
 
@@ -539,11 +570,20 @@ ErrorCode ObjectManager::deleteObject(void* obj, const char* file, int line)
 			if (itv != _regObjs.end()) {
 				_regObjs.erase(itv);
 			}
+
+			// 使用中：标记待删除，等最后一个使用者 releaseObject 时实际销毁
+			if (objInfo->_inUse > 0) {
+				objInfo->_pendingDelete = true;
+				_pendingDeleteObjs.push_back(objInfo);
+				deferred = true;
+			}
 		}
 	}
 
-	// 释放对象实例和 ObjectInfo 结构体（不加锁）
-	deleteObjInfo(objInfo);
+	// 释放对象实例和 ObjectInfo 结构体（不加锁）；使用中的对象延迟到 releaseObject
+	if (!deferred) {
+		deleteObjInfo(objInfo);
+	}
 	return PCH_SUCCESS;
 }
 
@@ -582,6 +622,55 @@ ObjectInfo* ObjectManager::getObjInfo(const char* objName)
 		return nullptr;
 	}
 	return it->second;
+}
+
+/**
+ * @brief 按名称获取对象并标记为使用中（in-use 计数 +1）
+ * @details 与 getObjInfo 的区别：返回前对对象加"使用中"计数；此后即使被 deleteObject，
+ *          实际销毁也会延迟到 releaseObject 计数归零，避免分发过程中 UAF
+ */
+ObjectInfo* ObjectManager::getObjInfoForUse(const char* objName)
+{
+	if (objName == nullptr || objName[0] == '\0') {
+		return nullptr;
+	}
+
+	std::lock_guard<std::recursive_mutex> lk(_mutex);
+	auto it = _regObjsMap.find(objName);
+	if (it == _regObjsMap.end() || it->second == nullptr || it->second->_pendingDelete) {
+		return nullptr;
+	}
+	++it->second->_inUse;
+	return it->second;
+}
+
+/**
+ * @brief 释放一次"使用中"标记；若计数归零且对象曾被标记待删除，则在此完成实际销毁
+ */
+void ObjectManager::releaseObject(ObjectInfo* objInfo)
+{
+	if (objInfo == nullptr) {
+		return;
+	}
+
+	ObjectInfo* toDelete = nullptr;
+	{
+		std::lock_guard<std::recursive_mutex> lk(_mutex);
+		if (objInfo->_inUse > 0) {
+			--objInfo->_inUse;
+		}
+		if (objInfo->_inUse == 0 && objInfo->_pendingDelete) {
+			auto it = std::find(_pendingDeleteObjs.begin(), _pendingDeleteObjs.end(), objInfo);
+			if (it != _pendingDeleteObjs.end()) {
+				_pendingDeleteObjs.erase(it);
+			}
+			toDelete = objInfo;
+		}
+	}
+
+	if (toDelete) {
+		deleteObjInfo(toDelete);
+	}
 }
 
 /**
@@ -675,6 +764,23 @@ std::vector<ObjectInfo*> ObjectManager::getRegisterObjects()
 {
 	std::lock_guard<std::recursive_mutex> lk(_mutex);
 	return _regObjs;
+}
+
+/**
+ * @brief 快照所有已注册对象并逐个加 in-use 计数，防止遍历分发期间被并发删除
+ */
+std::vector<ObjectInfo*> ObjectManager::getRegisterObjectsForUse()
+{
+	std::lock_guard<std::recursive_mutex> lk(_mutex);
+	std::vector<ObjectInfo*> result;
+	result.reserve(_regObjs.size());
+	for (auto* oi : _regObjs) {
+		if (oi && !oi->_pendingDelete) {
+			++oi->_inUse;
+			result.push_back(oi);
+		}
+	}
+	return result;
 }
 
 PCH_END_NAMESPACE

@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # 解决方案/工程显示名
-project(PlugCompHub VERSION 0.1.0)
+project(PlugCompHub VERSION 0.2.0)
 
 # Installation output directory: cmake --install build → dist/bin/ dist/lib/ dist/include/
 set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/dist" CACHE PATH "Install root directory")
@@ -10,10 +10,21 @@ set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/dist" CACHE PATH "Install root dir
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Windows Release：生成 PDB 便于排障；/MT 静态 CRT 减少宿主对 VC 运行时的部署依赖
+# Windows Release：生成 PDB 便于排障
 if(WIN32)
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi  /MT")
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
 	set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
+endif()
+
+# CRT 契约：默认所有配置统一使用静态 CRT（/MT /MTd），保证 core、插件、宿主
+# 跨 DLL 传递内存（std::string / std::function / 虚表对象）时运行库一致。
+# 需要动态 CRT 时：cmake -DPCH_USE_STATIC_CRT=OFF
+option(PCH_USE_STATIC_CRT "Use static C runtime (/MT) for all configurations on Windows" ON)
+if(WIN32 AND PCH_USE_STATIC_CRT)
+	foreach(_cfg DEBUG RELEASE MINSIZEREL RELWITHDEBINFO)
+		string(REPLACE "/MDd" "/MTd" CMAKE_CXX_FLAGS_${_cfg} "${CMAKE_CXX_FLAGS_${_cfg}}")
+		string(REPLACE "/MD" "/MT" CMAKE_CXX_FLAGS_${_cfg} "${CMAKE_CXX_FLAGS_${_cfg}}")
+	endforeach()
 endif()
 
 # MSVC：UTF-8 源文件编码；/W4 提高可维护性

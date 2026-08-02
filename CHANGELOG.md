@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.0] - 2026-08-02
+
+### 新增
+
+- 对象生命周期保护：ObjectInfo in-use 计数，分发期间删除对象改为延迟销毁
+- 核心单元测试：日志层级继承、消息所有权、对象并发删除（CTest 共 5 项）
+- 工具链与 ABI 契约文档 [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)
+- Windows 统一静态 CRT 选项 `PCH_USE_STATIC_CRT`（默认 ON）
+
 ## [0.1.1] - 2026-08-02
 
 ### 修复

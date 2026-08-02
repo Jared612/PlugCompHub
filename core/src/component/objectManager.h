@@ -34,6 +34,8 @@ struct ObjectInfo
 	Component*  component;  // 对象所属的组件封装指针。
 	std::string file;       // 创建该对象时的源码文件路径，用于调试追踪。
 	std::string objName;    // 对象名称，具名对象有效；匿名对象此字段为空。
+	int         _inUse = 0;             // 正在被分发/使用中的计数（由 ObjectManager 锁保护）
+	bool        _pendingDelete = false; // 使用中收到删除请求，等计数归零后实际销毁
 };
 
 /**
@@ -147,6 +149,22 @@ public:
 	ObjectInfo* getObjInfo(const char* objName);
 
 	/**
+	 * @brief 按名称获取对象元信息并标记为"使用中"（in-use 计数 +1）
+	 * @details 供消息分发等跨线程使用场景调用：获取期间对象即使被 deleteObject，
+	 *          也只会被标记为待删除，实际销毁延迟到 releaseObject 计数归零后。
+	 * @param[in] objName 对象名称
+	 * @return 找到返回 ObjectInfo*（已 +1 计数）；未找到/待删除返回 nullptr
+	 */
+	ObjectInfo* getObjInfoForUse(const char* objName);
+
+	/**
+	 * @brief 释放一次"使用中"标记（in-use 计数 -1）
+	 * @details 若计数归零且对象曾被标记待删除，则在此完成实际销毁
+	 * @param[in] objInfo 由 getObjInfoForUse / 内部路径取得并保留的 ObjectInfo*
+	 */
+	void releaseObject(ObjectInfo* objInfo);
+
+	/**
 	 * @brief 按名称查找对象实例地址。
 	 * @param[in] objName 对象名称。
 	 * @return 找到返回对象实例地址；未找到返回 nullptr。
@@ -180,6 +198,14 @@ public:
 	 * @return 包含所有 ObjectInfo 指针的 vector 副本。
 	 */
 	std::vector<ObjectInfo*> getRegisterObjects();
+
+	/**
+	 * @brief 获取当前所有已注册对象列表快照，并一次性为每个对象增加 in-use 计数
+	 * @details 供同步广播等需要遍历分发、且不希望对象在遍历期间被并发删除的场景使用；
+	 *          使用完毕后必须对每个元素调用 releaseObject
+	 * @return 已加计数的 ObjectInfo 快照
+	 */
+	std::vector<ObjectInfo*> getRegisterObjectsForUse();
 
 	/**
 	 * @brief 通过对象实例地址反查对象名称。
@@ -221,6 +247,7 @@ private:
 	std::vector<ObjectInfo*>               _regObjs;         //所有已注册对象（含具名和匿名）的列表，按注册顺序排列
 	RegistedObjInfos                       _regObjsMap;      //对象名 -> ObjectInfo 的映射表，用于按名称快速查找（具名对象）
 	std::unordered_map<void*, ObjectInfo*> _regObjAddrMap;   //对象地址 -> ObjectInfo 的映射表，用于按地址反查（具名+匿名）
+	std::vector<ObjectInfo*>               _pendingDeleteObjs; // 使用中收到删除请求、等待计数归零后销毁的对象
 };
 
 PCH_END_NAMESPACE

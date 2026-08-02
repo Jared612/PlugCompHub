@@ -190,7 +190,12 @@ pch::ErrorCode pch::MessageCenter::sendMessage(const char* target, IMessage*& re
 	
 	// 同步路径：当前调用线程直接进入目标 handleMessage；无论成功与否，此实现负责释放 request
 	// 保持接口文档语义"同步发送的消息由消息中心释放"一致（目标缺失/分发失败也不会泄漏）
-	int ret = invokeHandler(_objManager->getObjInfo(target), request, response);
+	// 分发期间持有 in-use 计数：并发 deleteObject 会被延迟，避免 UAF
+	ObjectInfo* objInfo = _objManager->getObjInfoForUse(target);
+	int ret = invokeHandler(objInfo, request, response);
+	if (objInfo) {
+		_objManager->releaseObject(objInfo);
+	}
 	freeMessage(request);
 	request = nullptr;
 	return ret;
@@ -232,7 +237,11 @@ ErrorCode MessageCenter::multicastLocalMessage(const char* group[], int count, I
 	if (!reverse) {
 		for (size_t i = 0; i < static_cast<size_t>(count); i++) {
 			IMessage* msg = nullptr;
-			ret = invokeHandler(_objManager->getObjInfo(group[i]), message, &msg);
+			ObjectInfo* objInfo = _objManager->getObjInfoForUse(group[i]);
+			ret = invokeHandler(objInfo, message, &msg);
+			if (objInfo) {
+				_objManager->releaseObject(objInfo);
+			}
 			if (msg) {
 				freeMessage(msg);
 			}
@@ -243,7 +252,11 @@ ErrorCode MessageCenter::multicastLocalMessage(const char* group[], int count, I
 	} else {
 		for (int i = count - 1; i >= 0; i--) {
 			IMessage* msg = nullptr;
-			ret = invokeHandler(_objManager->getObjInfo(group[i]), message, &msg);
+			ObjectInfo* objInfo = _objManager->getObjInfoForUse(group[i]);
+			ret = invokeHandler(objInfo, message, &msg);
+			if (objInfo) {
+				_objManager->releaseObject(objInfo);
+			}
 			if (msg) {
 				freeMessage(msg);
 			}
@@ -299,9 +312,12 @@ ErrorCode MessageCenter::broadcastLocalMessage(IMessage* &message, uint32_t msgP
 	bool reverse = (msgPolicy & ReverseOrder);
 	bool breakError = (msgPolicy & BreakOnError);
 	ErrorCode ret = PCH_SUCCESS;
-	auto objList = _objManager->getRegisterObjects();
+	auto objList = _objManager->getRegisterObjectsForUse();
 
 	auto dispatch = [&](ObjectInfo* obj) {
+		if (obj == nullptr) {
+			return;
+		}
 		IMessage* resp = nullptr;
 		ret = invokeHandler(obj, message, &resp);
 		if (resp) {
@@ -323,6 +339,11 @@ ErrorCode MessageCenter::broadcastLocalMessage(IMessage* &message, uint32_t msgP
 				break;
 			}
 		}
+	}
+
+	// 遍历分发完成，释放全部 in-use 计数（期间被标记待删除的对象在此实际销毁）
+	for (auto* oi : objList) {
+		_objManager->releaseObject(oi);
 	}
 
 	// 确保所有路径释放消息，避免 BreakOnError 分支泄漏
@@ -521,8 +542,8 @@ void MessageCenter::run()
 			if (_objManager == nullptr) {
 				break;
 			}
-			// 每次分发前按名称重新解析；如果目标已被删除则跳过；与同步路径 getObjInfo 使用相同锁
-			ObjectInfo* target = _objManager->getObjInfo(name.c_str());
+			// 每次分发前按名称重新解析并持有 in-use 计数；如果目标已被删除则跳过
+			ObjectInfo* target = _objManager->getObjInfoForUse(name.c_str());
 			if (target == nullptr) {
 				continue;
 			}
@@ -536,6 +557,7 @@ void MessageCenter::run()
 				WriteLog(LogLevel::Error, "async invokeHandler unknown exception");
 				resp = nullptr;
 			}
+			_objManager->releaseObject(target);
 			if (resp) {
 				freeMessage(resp);
 			}

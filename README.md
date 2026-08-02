@@ -52,6 +52,10 @@ ctest --test-dir build --output-on-failure
 cmake --install build --config Debug --prefix dist
 ```
 
+Windows 默认统一使用静态 CRT（`PCH_USE_STATIC_CRT=ON`），保证 core、插件、宿主
+跨 DLL 运行库一致；如需动态 CRT：`cmake -DPCH_USE_STATIC_CRT=OFF`。
+完整的工具链/ABI、生命周期与并发契约见 [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)。
+
 ## 快速开始
 
 构建后直接运行 `build/bin/Debug/` 下的示例：

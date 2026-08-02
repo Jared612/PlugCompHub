@@ -15,8 +15,35 @@ target_include_directories(pch_plugin_smoke PRIVATE
 )
 target_link_libraries(pch_plugin_smoke PRIVATE pch)
 
+add_executable(pch_logger_hierarchy_test pch_logger_hierarchy_test.cpp)
+target_include_directories(pch_logger_hierarchy_test PRIVATE
+	"${CMAKE_SOURCE_DIR}/include/pch"
+	"${CMAKE_SOURCE_DIR}/examples"
+)
+target_link_libraries(pch_logger_hierarchy_test PRIVATE pch)
+
+add_executable(pch_message_ownership_test pch_message_ownership_test.cpp)
+target_include_directories(pch_message_ownership_test PRIVATE
+	"${CMAKE_SOURCE_DIR}/include/pch"
+	"${CMAKE_SOURCE_DIR}/examples"
+)
+target_link_libraries(pch_message_ownership_test PRIVATE pch)
+
+add_executable(pch_object_lifetime_test pch_object_lifetime_test.cpp)
+target_include_directories(pch_object_lifetime_test PRIVATE
+	"${CMAKE_SOURCE_DIR}/include/pch"
+	"${CMAKE_SOURCE_DIR}/examples"
+)
+target_link_libraries(pch_object_lifetime_test PRIVATE pch)
+
 # 将运行所需的动态库复制到测试可执行文件目录
-foreach(_tgt IN ITEMS pch_core_smoke pch_plugin_smoke)
+foreach(_tgt IN ITEMS
+	pch_core_smoke
+	pch_plugin_smoke
+	pch_logger_hierarchy_test
+	pch_message_ownership_test
+	pch_object_lifetime_test
+)
 	add_custom_command(TARGET ${_tgt} POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			"$<TARGET_FILE:pch>"
@@ -31,3 +58,6 @@ add_custom_command(TARGET pch_plugin_smoke POST_BUILD
 
 add_test(NAME core_smoke COMMAND pch_core_smoke)
 add_test(NAME plugin_smoke COMMAND pch_plugin_smoke)
+add_test(NAME logger_hierarchy COMMAND pch_logger_hierarchy_test)
+add_test(NAME message_ownership COMMAND pch_message_ownership_test)
+add_test(NAME object_lifetime COMMAND pch_object_lifetime_test)
