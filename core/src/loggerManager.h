@@ -9,7 +9,6 @@
  */
 #pragma once
 #include "interface.h"
-#include "interface.h"
 #include <atomic>
 #include <cstdarg>
 #include <list>
@@ -19,6 +18,9 @@
 #include <vector>
 
 PCH_BEGIN_NAMESPACE
+
+// 日志级别"未设置"哨兵值（LoggerLevelCtrl::_logLevel 默认值）
+constexpr LogLevel LOG_LEVEL_UNSET = static_cast<LogLevel>(-1);
 
 // 日志入口函数，在 loggerManager.cpp 中定义，将日志写入标准输出
 void    WriteLog(LogLevel level, const char* fmt, ...);
@@ -32,6 +34,7 @@ public:
 	// 向标准输出写入日志文本
 	virtual void writeLog(LogLevel level, const char* logText)
 	{
+		(void)level;
 		printf("%s", logText);
 		printf("\n");
 	}
@@ -189,7 +192,7 @@ public:
 
 	bool _systemIsShutdown = false;										// 系统是否已关闭
 	std::vector<std::pair<ILoggerWrite*,ILoggerFormat*> > _loggerWrite;	// 输出后端列表
-	LogLevel _logLevel = (LogLevel)-1;  // 日志级别
+	LogLevel _logLevel = LOG_LEVEL_UNSET;  // 日志级别（未设置时继承父级/默认）
 	std::string _loggerName;                  // 日志器名称
 	bool        _isGet = false;               // 是否已被获取
 };

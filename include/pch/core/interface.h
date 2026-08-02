@@ -62,7 +62,7 @@ public:
 	* 可用数据大小为 getSize() 返回的值
 	* @return 数据指针
 	*/
-	virtual unsigned char* const getData() const = 0;
+	virtual unsigned char* getData() const = 0;
 
 	/**
 	* @brief 获取此消息的发送者名称
@@ -78,7 +78,7 @@ public:
 	/**
 	* @brief 获取此消息的接收者数量
 	*/
-	virtual const uint16_t getTargetsCount() const = 0;
+	virtual uint16_t getTargetsCount() const = 0;
 
 };
 

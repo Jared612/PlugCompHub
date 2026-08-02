@@ -5,7 +5,6 @@
  */
 #pragma once
 #include "interface.h"
-#include "interface.h"
 #include "componentinfo.h"
 #include "coreexport.h"
 #include "plugininfo.h"

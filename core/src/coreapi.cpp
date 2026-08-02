@@ -4,7 +4,6 @@
  * @details Initialize/Terminate 调用 pchcoreStart/pchcoreStop；对象相关接口委托给 ObjectManager。动态加载场景只需使用 core.h。
  */
 #include <string.h>
-#include <fstream>
 #include "componentManager.h"
 #include "error.h"
 #include "interface.h"
@@ -27,10 +26,10 @@ LoggerManager*    _loggerManager    = nullptr;  // 全局日志管理器指针
 Environment*      _environment      = nullptr;  // 全局环境组件指针
 
 /**
- * @brief 前向声明：启动 PCH 内核（在 pchcore.cpp 中实现）
+ * @brief 前向声明：启动 PCH 内核（在 coreinit.cpp 中实现）
  * @details
  * 此 extern 仅表示此翻译单元外有定义，供本文件调用 pchcoreStart()。
- * pch.cpp 中的其他函数同样位于 PCH 目标中；pchcore.cpp 提供函数体。
+ * 本文件中的其他函数同样位于 PCH 目标中；coreinit.cpp 提供函数体。
  * @return 成功返回 ObjectManager*（作为 IObjectManager*）；失败返回 nullptr
  */
 extern __PCH_API IObjectManager* pchcoreStart();
@@ -82,6 +81,13 @@ ErrorCode Initialize(IObjectManager* &objectManager)
 	if (_pluginManager == nullptr || _componentManager == nullptr || _msgCenter == nullptr || _loggerManager == nullptr || _environment == nullptr)
 	{
 		WriteLog(LogLevel::Error, "PCH core component find failed!");
+		// 清理已启动的内核，避免失败后留下半初始化状态
+		pchcoreStop();
+		_pluginManager    = nullptr;
+		_componentManager = nullptr;
+		_msgCenter        = nullptr;
+		_loggerManager    = nullptr;
+		_environment      = nullptr;
 		return PCH_FAILED;
 	}
 

@@ -6,7 +6,6 @@
 
 #pragma once
 #include "interface.h"
-#include "interface.h"
 #include <list>
 #include <mutex>
 #include <string>
@@ -27,6 +26,8 @@ public:
 	 * @param[in] key 环境变量名
 	 * @param[out] errCode 可选错误码输出指针
 	 * @return 命中缓存或系统环境变量时返回值指针，失败返回 nullptr
+	 * @note 返回指针指向内部缓存，仅保证在调用线程内、下一次 set() 修改同键之前有效；
+	 *       多线程共享场景请自行拷贝为 std::string
 	 */
 	const char* get(const char* key, ErrorCode* errCode = nullptr);
 

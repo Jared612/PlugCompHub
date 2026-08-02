@@ -5,7 +5,6 @@
  */
 #pragma once
 #include "interface.h"
-#include "interface.h"
 #include "plugin.h"
 #include <list>
 #include <mutex>

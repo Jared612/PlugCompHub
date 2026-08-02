@@ -36,6 +36,10 @@ static std::string getErrorMessage()
 								 (LPSTR)&messageBuffer,
 								 0,
 								 NULL);
+	// FormatMessageA 失败时缓冲区可能未分配，size 为 0；避免用空指针构造 std::string
+	if (size == 0 || messageBuffer == nullptr) {
+		return "";
+	}
 	// 从此缓冲区构造 std::string
 	std::string message(messageBuffer, size);
 	// 释放系统分配的内存

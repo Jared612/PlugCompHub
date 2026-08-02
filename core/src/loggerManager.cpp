@@ -67,7 +67,7 @@ void splicLogName(const char* logName,std::vector<std::string> &names)
 	// 添加日志器名称
 	names.push_back(nameStr);
 	// 遍历日志器名称
-	for (int i = nameStr.length() - 1; i >= 0; i--)
+	for (int i = static_cast<int>(nameStr.length()) - 1; i >= 0; i--)
 	{
 		if (nameStr.c_str()[i] == delim)
 		{
@@ -110,8 +110,8 @@ ILogger* LoggerManager::mergeLogger(const char* logName)
 	// 选择日志器
 	LoggerLevelCtrl* selectLogger = nullptr;
 
-	// 加锁防止并发访问
-	_mutex.lock();
+	// 加锁防止并发访问（RAII；任何返回路径都自动解锁）
+	std::lock_guard<std::mutex> lk(_mutex);
 	// 遍历日志器名称
 	for (int i = 0; i < logNameVec.size(); i++) {
 		auto it = _loggerMap.find(logNameVec[i]);
@@ -125,11 +125,11 @@ ILogger* LoggerManager::mergeLogger(const char* logName)
 				if (selectLogger->_loggerWrite.size() == 0)
 					selectLogger->_loggerWrite = it->second._loggerWrite;
 				// 如果选中的日志器级别为空，使用当前日志器的级别
-				if (selectLogger->_logLevel == (LogLevel)-1)
+				if (selectLogger->_logLevel == LOG_LEVEL_UNSET)
 					selectLogger->_logLevel = it->second._logLevel;
 			}
-			// 如果选中的日志器输出后端非空且级别非空，跳出循环
-			if (selectLogger->_loggerWrite.size() > 0 && selectLogger->_logLevel == (LogLevel)-1)
+			// 如果选中的日志器输出后端与级别都已确定，无需继续向上继承
+			if (!selectLogger->_loggerWrite.empty() && selectLogger->_logLevel != LOG_LEVEL_UNSET)
 				break;
 		}	
 		// 如果是第一个日志器名称，创建日志器
@@ -148,10 +148,8 @@ ILogger* LoggerManager::mergeLogger(const char* logName)
 	if (selectLogger->_loggerWrite.size() == 0)
 		selectLogger->_loggerWrite = _defaultLogger._loggerWrite;
 	// 如果选中的日志器级别为空，使用默认日志器的级别
-	if (selectLogger->_logLevel == (LogLevel)-1)
+	if (selectLogger->_logLevel == LOG_LEVEL_UNSET)
 		selectLogger->_logLevel = _defaultLogger._logLevel;
-	// 解锁
-	_mutex.unlock();
 	// 返回选中的日志器
 	return selectLogger;
 }
@@ -421,7 +419,9 @@ const pch::IMessage* LoggerManager::handleMessage(const pch::IMessage* msg)
 		// 系统就绪消息
 		case pch::SystemReady:
 		{
-			_PCHLogger.store((LoggerLevelCtrl*)this->getLogger("PCHCore"), std::memory_order_release);
+			// 直接指向默认日志器成员，避免 getLogger() 将默认日志器标记为 _isGet，
+			// 导致 SystemReady 之后 setDefaultLogger / addDefaultLogger 全部失效
+			_PCHLogger.store(&_defaultLogger, std::memory_order_release);
 		}
 		break;
 		// 系统关闭消息

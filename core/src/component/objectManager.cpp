@@ -302,6 +302,16 @@ ObjectInfo* ObjectManager::createObject(const char* componentID, ErrorCode* errC
 			_regObjAddrMap[objInfo->object] = objInfo;
 		}
 	} catch (...) {
+		// 回滚：移除可能已加入 _regObjs 的条目，避免悬垂指针残留在列表中
+		{
+			std::lock_guard<std::recursive_mutex> lk(_mutex);
+			if (!_regObjs.empty() && _regObjs.back() == objInfo) {
+				_regObjs.pop_back();
+			}
+			if (objInfo->object) {
+				_regObjAddrMap.erase(objInfo->object);
+			}
+		}
 		// 异常如 vector 扩容失败：回滚对象实例和 ObjectInfo
 		deleteObjInfo(objInfo);
 		if (errCode) {

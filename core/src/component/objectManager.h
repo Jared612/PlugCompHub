@@ -14,7 +14,6 @@
 #include <vector>
 #include <memory>
 #include "interface.h"
-#include "interface.h"
 #include "component.h"
 
 PCH_BEGIN_NAMESPACE
@@ -187,6 +186,8 @@ public:
 	 * @param[in] obj 对象实例地址。
 	 * @return 命中具名对象返回其名称；命中匿名对象返回空字符串 ""；
 	 *         未命中或 `obj == nullptr` 返回 nullptr（与 `interface.h` 约定一致）。
+	 * @note 返回指针指向对象内部名称存储，仅保证调用线程内、对象被并发删除前有效；
+	 *       请勿长期持有
 	 */
 	const char* getObjectName(void* obj);
 

@@ -35,8 +35,11 @@ PCH_COMPONENT_EXPORT_TABLE_END()                        // 结束内置组件导
 PCH_BEGIN_NAMESPACE
 
 
-extern ObjectManager* _objManager;			/** 声明（非定义）：_objManager 在 pch.cpp 中定义并分配存储，此处仅引用同一全局变量。 */
-extern ComponentManager* _componentManager;	/** 同上，extern 表示链接到 pch.cpp 中的唯一定义。 */
+extern ObjectManager* _objManager;			/** 声明（非定义）：_objManager 在 coreapi.cpp 中定义并分配存储，此处仅引用同一全局变量。 */
+extern ComponentManager* _componentManager;	/** 同上，extern 表示链接到 coreapi.cpp 中的唯一定义。 */
+
+/** 前向声明：停止 PCH 内核（定义见本文件下方 pchcoreStop） */
+__PCH_API void pchcoreStop();
 
 /**
  * @brief 实现 pchcoreStart，启动 PCH 内核运行时
@@ -129,11 +132,14 @@ __PCH_API IObjectManager* pchcoreStart()
 	auto cmIt = objInfoMap.find(PCH_COMPONENT_MANAGER_ID);
 	if (cmIt == objInfoMap.end() || cmIt->second == nullptr) {
 		WriteLog(LogLevel::Fatal, "ComponentManager is missing");
+		// 回滚已注册的核心对象并清空全局状态，避免半初始化残留
+		pchcoreStop();
 		return nullptr;
 	}
 	_componentManager = static_cast<ComponentManager*>(cmIt->second->object);
 	if (_componentManager == nullptr) {
 		WriteLog(LogLevel::Fatal, "ComponentManager object is nullptr");
+		pchcoreStop();
 		return nullptr;
 	}
 

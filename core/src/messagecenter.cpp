@@ -4,7 +4,7 @@
 #include "interface.h"
 #include "componentinfo.h"
 #include "plugininfo.h"
-#include <error.h>
+#include "error.h"
 #include "objectManager.h"
 #include "loggerManager.h"
 #include "environment.h"
@@ -35,7 +35,7 @@ MessageCenter::~MessageCenter()
 {
 	{
 		std::unique_lock<std::mutex> lk(_mutex);
-		_isTerminate = true;
+		_isTerminate.store(true, std::memory_order_release);
 		_cv.notify_all();
 	}
 
@@ -82,9 +82,7 @@ IMessage* MessageCenter::allocMessage(uint32_t code, uint32_t size, const char* 
 			delete msg;
 			return nullptr;
 		}
-	}
-	// 如果数据长度 > 0，填充数据缓冲区
-	if (msg->_data) {
+		// 填充数据缓冲区
 		memset(msg->_data, 0, size);
 	}
 	// 返回 Message 对象
@@ -212,6 +210,12 @@ ErrorCode MessageCenter::multicastLocalMessage(const char* group[], int count, I
 	// 如果消息为空，返回 PCH_PARAM_INVALID
 	if (message == nullptr)
 		return PCH_PARAM_INVALID;
+	// 参数校验：count 不能为负，count > 0 时 group 不能为空
+	if (count < 0 || (count > 0 && group == nullptr)) {
+		WriteLog(LogLevel::Debug, "multicastLocalMessage: invalid group/count");
+		return PCH_PARAM_INVALID;
+	}
+	(void)timeout;
 
     // 如果对象管理器为空，返回 PCH_OBJMANAGER_NULLPTR
     if (nullptr == _objManager)
@@ -225,7 +229,6 @@ ErrorCode MessageCenter::multicastLocalMessage(const char* group[], int count, I
 	bool breakError = (msgPolicy & BreakOnError);
 	// 初始化返回码
 	ErrorCode ret = PCH_SUCCESS;
-	bool stopped = false;
 	if (!reverse) {
 		for (size_t i = 0; i < static_cast<size_t>(count); i++) {
 			IMessage* msg = nullptr;
@@ -234,7 +237,6 @@ ErrorCode MessageCenter::multicastLocalMessage(const char* group[], int count, I
 				freeMessage(msg);
 			}
 			if (breakError && ret != PCH_SUCCESS) {
-				stopped = true;
 				break;
 			}
 		}
@@ -246,7 +248,6 @@ ErrorCode MessageCenter::multicastLocalMessage(const char* group[], int count, I
 				freeMessage(msg);
 			}
 			if (breakError && ret != PCH_SUCCESS) {
-				stopped = true;
 				break;
 			}
 		}
@@ -255,7 +256,6 @@ ErrorCode MessageCenter::multicastLocalMessage(const char* group[], int count, I
 	// 无论是否中途 break，MessageCenter 回收消息体，避免 BreakOnError 路径泄漏
 	freeMessage(message);
 	message = nullptr;
-	(void)stopped;
 	return ret;
 }
 
@@ -285,6 +285,7 @@ ErrorCode MessageCenter::broadcastMessageAsync(IMessage*& message, uint32_t dstN
  */
 ErrorCode MessageCenter::broadcastLocalMessage(IMessage* &message, uint32_t msgPolicy, uint32_t timeout)
 {
+	(void)timeout;
 	if (message == nullptr) {
 		return PCH_PARAM_INVALID;
 	}
@@ -384,6 +385,11 @@ ErrorCode MessageCenter::postMessage(const char* target, IMessage*& message, uin
 ErrorCode MessageCenter::multicastLocalMessageAsync(const char* group[], int count, IMessage* &message, uint32_t msgPolicy)
 {
 	if (message == nullptr) {
+		return PCH_PARAM_INVALID;
+	}
+	// 参数校验：count 不能为负，count > 0 时 group 不能为空
+	if (count < 0 || (count > 0 && group == nullptr)) {
+		WriteLog(LogLevel::Debug, "multicastLocalMessageAsync: invalid group/count");
 		return PCH_PARAM_INVALID;
 	}
 
@@ -497,10 +503,12 @@ void MessageCenter::run()
 {
 	// 单一消费者线程：从 _messages 取出 MessagePack，按名称解析目标（避免裸 ObjectInfo* UAF），
 	// 分发完成后统一 freeMessage
-	while (!_isTerminate) {
+	while (!_isTerminate.load(std::memory_order_acquire)) {
 		std::unique_lock<std::mutex> lk(_mutex);
 		if (_messages.empty()) {
-			_cv.wait(lk, [=]() { return !_messages.empty() || _isTerminate; });
+			_cv.wait(lk, [=]() {
+				return !_messages.empty() || _isTerminate.load(std::memory_order_acquire);
+			});
 		}
 		if (_messages.empty()) {
 			continue;
@@ -684,6 +692,11 @@ ErrorCode pch::MessageCenter::postRemoteMessage(uint32_t dstNodeID, const char* 
  */
 ErrorCode pch::MessageCenter::multicastMessageAsync(const char* targets[], int count, IMessage*& message, uint32_t dstNodeID , uint32_t msgPolicy)
 {
+	// 参数校验：count 不能为负，count > 0 时 targets 不能为空
+	if (count < 0 || (count > 0 && targets == nullptr)) {
+		WriteLog(LogLevel::Debug, "multicastMessageAsync: invalid targets/count");
+		return PCH_PARAM_INVALID;
+	}
 	// 如果目标节点 ID 为 0，本地组播
 	if (0 == dstNodeID) {
 		return multicastLocalMessageAsync(targets, count, message, msgPolicy);

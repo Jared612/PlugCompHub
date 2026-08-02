@@ -4,6 +4,7 @@
  * @details Message 是 IMessage 实现类；MessageCenter 是 IMessageCenter/IMessageHandler 实现。实现在 messagecenter.cpp 中。
  */
 #pragma once
+#include <atomic>
 #include <condition_variable>
 #include <deque>
 #include <functional>
@@ -44,7 +45,7 @@ public:
 	}
 
 	/** @brief 数据缓冲区指针（长度 = getSize()） */
-	virtual unsigned char* const getData() const override
+	virtual unsigned char* getData() const override
 	{
 		return _data;
 	}
@@ -69,7 +70,7 @@ public:
 	}
 	
 	/** @brief 接收者数量 */
-	virtual const uint16_t getTargetsCount() const override
+	virtual uint16_t getTargetsCount() const override
 	{
 		// 接口当前为 uint16_t；对于超长目标列表，安全截断并记录警告，避免静默截断为 0 等
 		// 如果业务确实需要 >UINT16_MAX 个接收者，应以 ABI 兼容方式将接口升级为 uint32_t
@@ -141,6 +142,9 @@ public:
 	 * @param[in] dstNodeID 目标节点，0 表示本进程
 	 * @param[in] timeout 超时时间（毫秒），供远程路径使用
 	 * @return PCH_SUCCESS 或错误码
+	 * @note 同步分发使用目标对象的裸指针，调用方须保证分发期间目标对象不会被并发
+	 *       deleteObject / tearDown；否则可能触发悬垂指针访问（与异步路径不同，
+	 *       异步路径已按名称二次解析规避该问题）
 	 */
 	virtual ErrorCode sendMessage(const char* target, IMessage*& request, IMessage** response,  uint32_t dstNodeID = 0, uint32_t timeout = 0) override;
 
@@ -221,6 +225,7 @@ public:
 	 * @param[in] msgPolicy 顺序和错误策略
 	 * @param[in] timeout 保留（当前实现未使用）
 	 * @return PCH_SUCCESS 或错误码
+	 * @note 同 sendMessage：同步分发期间目标对象不得被并发删除
 	 */
 	virtual ErrorCode broadcastLocalMessage(IMessage* &message, uint32_t msgPolicy = DefaultMsgPolic, uint32_t timeout = 0) override;
 
@@ -307,9 +312,9 @@ private:
 		std::vector<std::string> _targetNames; // 接收者对象名列表（按名称解析，避免持有原始 ObjectInfo*）
 		IMessage* _msg;                        // 要分发的消息（处理后释放）
 	};
-	bool                         _isTerminate;                // 请求线程退出
+	std::atomic<bool>            _isTerminate;                // 请求线程退出（跨线程读写，用 atomic 避免数据竞争）
 	std::deque<MessagePack>      _messages;                   // 异步任务队列
-	std::mutex                   _mutex;                      // 保护队列和 _isTerminate
+	std::mutex                   _mutex;                      // 保护 _messages 队列
 	std::condition_variable      _cv;                         // 队列非空或退出时唤醒
 	std::unique_ptr<std::thread> _thread;                     // 异步分发工作线程（入口 run）：构造时以 std::thread(&MessageCenter::run, this) 启动，析构时 join；与 _messages、_cv 协作消费本地异步入队的 post/multicast/broadcast 任务
 	IMessageRelayer              *_messageRelayer = nullptr;  // 可选的分布式消息中继。初始为 nullptr；在 SystemReady 时，通过环境变量 PCH_MESSAGE_RELAY 使用 findObject 绑定（默认对象名与该字符串相同）。未注册或查找失败保持 null；此时 dstNodeID != 0 的远程路径及 join/leave group 等将失败。
