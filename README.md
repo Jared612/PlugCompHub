@@ -24,8 +24,6 @@ PlugCompHub/
 │   ├── sqlite/    #   SQLite 插件（pchsqlite）
 │   ├── threadpool/#   线程池插件（pchthreadpool）
 │   └── application/#  应用骨架插件（pchapplication）
-├── examples/      # 示例程序
-├── tests/         # CTest 冒烟测试
 ├── docs/          # 功能规范与历史分析
 └── 3rdparty/      # vendored 第三方依赖
 ```
@@ -35,7 +33,6 @@ PlugCompHub/
 ```bash
 cmake -S . -B build -A x64        # Windows / Visual Studio
 cmake --build build --config Debug
-ctest --test-dir build -C Debug --output-on-failure
 ```
 
 Linux / macOS：
@@ -43,7 +40,6 @@ Linux / macOS：
 ```bash
 cmake -S . -B build
 cmake --build build
-ctest --test-dir build --output-on-failure
 ```
 
 安装到 `dist/`：
@@ -58,17 +54,16 @@ Windows 默认统一使用静态 CRT（`PCH_USE_STATIC_CRT=ON`），保证 core�
 
 ## 快速开始
 
-构建后直接运行 `build/bin/Debug/` 下的示例：
+业务集成方式：包含伞头 `pch.h`（或按需 `core/core.h`、`threadpool/ithreadpool.h` 等），调用 `pch::api::Initialize()` 启动内核，再通过 `pch::api::FindObject(PCH_DEFAULT_PLUGINMANAGER)` 加载插件、`pch::api::CreateNamedObject()` 创建对象：
 
-```bash
-example_threadpool
-example_sqlite
-example_logger
-example_net
-example_application
+```cpp
+pch::api::Initialize("pch.dll");
+auto* pm = static_cast<pch::IPluginManager*>(
+    pch::api::FindObject(PCH_DEFAULT_PLUGINMANAGER));
+pm->loadPlugin("pchthreadpool.dll");
+auto* tp = static_cast<pch::IThreadPool*>(
+    pch::api::CreateNamedObject("cpp.pch.threadpool", "my.tp"));
 ```
-
-业务集成方式：包含伞头 `pch.h`（或按需 `core/core.h`、`threadpool/ithreadpool.h` 等），调用 `pch::api::Initialize()` 启动内核，再通过 `pch::api::FindObject(PCH_DEFAULT_PLUGINMANAGER)` 加载插件、`pch::api::CreateNamedObject()` 创建对象。
 
 ## 开发约定
 

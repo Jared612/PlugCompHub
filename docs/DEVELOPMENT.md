@@ -55,16 +55,5 @@
 ctest --test-dir build -C Debug --output-on-failure
 ```
 
-当前测试（`tests/`）：
-
-| 测试 | 覆盖内容 |
-|---|---|
-| core_smoke | 初始化、核心管理器可达、终止 |
-| plugin_smoke | 插件加载、组件创建、线程池对象工作 |
-| logger_hierarchy | 命名日志器层级级别继承、SystemReady 后默认日志器仍可扩展 |
-| message_ownership | 消息所有权：错误路径释放、组播中断、负数 count 校验 |
-| object_lifetime | 分发期间删除对象：立即不可见 + 延迟销毁 |
-| plugin_unload | 插件卸载：有活对象拒绝卸载、删除后可卸载、可重新加载 |
-| concurrency | 多线程并发创建/删除对象与同步消息分发压力测试 |
-
-修改 core 业务逻辑时必须保证上述测试通过，并优先为新增行为补充对应测试。
+> 当前 `examples/` 与 `tests/` 已移除，等待重构回归；上述命令在无用例时不会失败
+> （CI 已加 `--no-tests=ignore`）。修改 core 业务逻辑时，仍要求为新增行为补充对应测试。

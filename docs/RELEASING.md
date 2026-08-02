@@ -11,7 +11,7 @@
    ```bash
    cmake -S . -B build -A x64
    cmake --build build --config Debug
-   ctest --test-dir build -C Debug --output-on-failure
+   ctest --test-dir build -C Debug --output-on-failure --no-tests=ignore
    cmake --install build --config Debug --prefix dist
    ```
 5. **打标签**：
