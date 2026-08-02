@@ -44,6 +44,7 @@ target_include_directories(pchapplication
 		$<INSTALL_INTERFACE:include>
 	PRIVATE
 		${CMAKE_CURRENT_SOURCE_DIR}/src
+	SYSTEM PRIVATE
 		${CMAKE_SOURCE_DIR}/3rdparty/cpptoml
 )
 

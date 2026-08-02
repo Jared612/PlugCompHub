@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # 解决方案/工程显示名
-project(PlugCompHub VERSION 0.2.0)
+project(PlugCompHub VERSION 0.2.1)
 
 # Installation output directory: cmake --install build → dist/bin/ dist/lib/ dist/include/
 set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/dist" CACHE PATH "Install root directory")

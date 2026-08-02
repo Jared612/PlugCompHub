@@ -25,6 +25,7 @@ target_include_directories(pchnetwork
 		$<INSTALL_INTERFACE:include>
 	PRIVATE
 		"${CMAKE_CURRENT_SOURCE_DIR}/src"
+	SYSTEM PRIVATE
 		"${CMAKE_SOURCE_DIR}/3rdparty/httplib"
 )
 

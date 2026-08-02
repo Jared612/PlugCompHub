@@ -32,6 +32,7 @@
 #define PCH_COMMANAGER_NULLPTR               -205  // 组件管理器为空
 #define PCH_PLUGMANAGER_NULLPTR              -206  // 插件管理器为空
 #define PCH_PARAM_NULLPTR                    -207  // 函数调用参数错误（空指针）
+#define PCH_PLUGIN_ABI_MISMATCH              -208  // 插件 ABI 版本与 core 不匹配
 #define PCH_NOTFOUND                         -300  // 未找到错误
 #define PCH_OBJECT_NOTFOUND                  -301  // 对象未找到，可能是对象名错误或对象未创建
 #define PCH_HANDLER_NOTFOUND                 -302  // 消息处理器未找到，可能未注册

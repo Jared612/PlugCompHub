@@ -592,7 +592,12 @@ ErrorCode MessageCenter::invokeHandler(ObjectInfo* objInfo, IMessage* &req, IMes
 
 	// 如果目标对象组件、对象和请求消息都有效，调用 IMessageHandler::handleMessage
 	if (objInfo->component && objInfo->object && req) {
-		IMessageHandler* componentTmpl = (IMessageHandler*)objInfo->component->getComponentInfo()->getMessageHandler(objInfo->object);
+		// 防御性校验：组件信息或其消息处理器可能缺失（正常创建路径保证非空）
+		ComponentInfo* ci = objInfo->component->getComponentInfo();
+		IMessageHandler* componentTmpl = nullptr;
+		if (ci && ci->getMessageHandler) {
+			componentTmpl = (IMessageHandler*)ci->getMessageHandler(objInfo->object);
+		}
 		if (componentTmpl) {
 			// 调用 IMessageHandler::handleMessage
 			const IMessage* msg = componentTmpl->handleMessage(req);

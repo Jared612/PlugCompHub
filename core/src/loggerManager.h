@@ -22,6 +22,20 @@ PCH_BEGIN_NAMESPACE
 // 日志级别"未设置"哨兵值（LoggerLevelCtrl::_logLevel 默认值）
 constexpr LogLevel LOG_LEVEL_UNSET = static_cast<LogLevel>(-1);
 
+// 日志级别文本（默认控制台输出前缀）
+inline const char* logLevelName(LogLevel level)
+{
+	switch (level) {
+	case LogLevel::Trace:       return "TRACE";
+	case LogLevel::Debug:       return "DEBUG";
+	case LogLevel::Information: return "INFO";
+	case LogLevel::Warning:     return "WARN";
+	case LogLevel::Error:       return "ERROR";
+	case LogLevel::Fatal:       return "FATAL";
+	default:                    return "OFF";
+	}
+}
+
 // 日志入口函数，在 loggerManager.cpp 中定义，将日志写入标准输出
 void    WriteLog(LogLevel level, const char* fmt, ...);
 // 单次日志格式化缓冲区的最大长度（含尾部预留空间）
@@ -34,9 +48,7 @@ public:
 	// 向标准输出写入日志文本
 	virtual void writeLog(LogLevel level, const char* logText)
 	{
-		(void)level;
-		printf("%s", logText);
-		printf("\n");
+		printf("[%s] %s\n", logLevelName(level), logText);
 	}
 
 	// 刷新缓冲区

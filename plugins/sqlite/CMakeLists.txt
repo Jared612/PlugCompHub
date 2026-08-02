@@ -31,6 +31,7 @@ target_include_directories(pchsqlite
 		$<INSTALL_INTERFACE:include>
 	PRIVATE
 		"${CMAKE_CURRENT_SOURCE_DIR}/src"
+	SYSTEM PRIVATE
 		"${CMAKE_SOURCE_DIR}/3rdparty/sqlite3/include"
 )
 

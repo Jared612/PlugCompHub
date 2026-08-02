@@ -142,6 +142,18 @@ const char* Plugin::getDescription()
 }
 
 /**
+ * @brief 获取插件编译时的 PCH ABI 版本
+ * @return ABI 版本号；无元数据时返回 0
+ */
+uint32_t Plugin::getAbiVersion()
+{
+	if (_info) {
+		return _info->abiVersion;
+	}
+	return 0;
+}
+
+/**
  * @brief 获取插件路径
  * @return 插件路径字符串
  */

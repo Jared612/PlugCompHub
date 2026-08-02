@@ -18,6 +18,9 @@
   - 不得删除或修改已存在函数的签名；
   - 不得在已发布接口的类中新增虚函数（会破坏派生类 vtable 布局），
     需要扩展时升级版本号并新增接口。
+- **ABI 版本校验**：跨 DLL 的结构体（如 `PluginInfo`）增删字段、接口类增删虚函数时，
+  必须递增 `PCH_ABI_VERSION`；core 加载插件时会校验插件侧 ABI 版本，
+  不匹配返回 `PCH_PLUGIN_ABI_MISMATCH` 并拒绝加载。
 - 插件必须与 core 使用同一编译器系列、同一 C++ 标准、同一 CRT 模式构建。
 
 ## 2. 对象生命周期语义
@@ -31,6 +34,11 @@
   因此正常退出路径不需要业务侧逐个删除。
 - 接口返回的指针（如 `IEnvironment::get`、`IObjectManager::getObjectName`）
   指向内部存储，仅保证调用线程内、下一次修改/删除前有效；需要长期持有请自行拷贝。
+- `CreateObject` / `CreateNamedObject` 的 `initMsg` 只用于初始化投递，
+  由**调用方负责释放**（消息中心不接管所有权）；这与 `sendMessage` 的
+  "消息中心负责释放"语义不同，使用时注意区分。
+- `Initialize` 幂等：core 侧和宿主侧 `api::Initialize` 对重复初始化都返回
+  `PCH_SUCCESS`；`Terminate` 之后可以再次 `Initialize`。
 
 ## 3. 并发模型
 
@@ -56,5 +64,7 @@ ctest --test-dir build -C Debug --output-on-failure
 | logger_hierarchy | 命名日志器层级级别继承、SystemReady 后默认日志器仍可扩展 |
 | message_ownership | 消息所有权：错误路径释放、组播中断、负数 count 校验 |
 | object_lifetime | 分发期间删除对象：立即不可见 + 延迟销毁 |
+| plugin_unload | 插件卸载：有活对象拒绝卸载、删除后可卸载、可重新加载 |
+| concurrency | 多线程并发创建/删除对象与同步消息分发压力测试 |
 
 修改 core 业务逻辑时必须保证上述测试通过，并优先为新增行为补充对应测试。

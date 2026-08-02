@@ -50,6 +50,12 @@ public:
 	const char* getDescription();
 
 	/**
+	 * @brief 获取插件编译时的 PCH ABI 版本
+	 * @return ABI 版本号；无元数据时返回 0
+	 */
+	uint32_t getAbiVersion();
+
+	/**
 	 * @brief 获取插件文件路径
 	 * @return 插件路径字符串
 	 */

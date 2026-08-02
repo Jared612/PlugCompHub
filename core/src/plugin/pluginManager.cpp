@@ -84,6 +84,13 @@ ErrorCode PluginManager::registerPlugin(Plugin* plugin)
 		return PCH_PLUGIN_NULLPTR;
 	}
 
+	// ABI 版本校验：公共接口布局不匹配的插件直接拒绝，避免 vtable/结构错乱
+	if (plugin->getAbiVersion() != PCH_ABI_VERSION) {
+		WriteLog(LogLevel::Warning, "plugin[%s] ABI version mismatch (plugin=%u, core=%u)",
+				 pluginName, plugin->getAbiVersion(), (unsigned)PCH_ABI_VERSION);
+		return PCH_PLUGIN_ABI_MISMATCH;
+	}
+
 	// 前置检查：组件管理器必须就绪
 	if (_componentManager == nullptr) {
 		WriteLog(LogLevel::Warning, "PCH has not been initialized! can't register component!");
@@ -179,9 +186,12 @@ ErrorCode PluginManager::unloadPlugin(IPlugin* plugin)
 	}
 
 	// 3) 从 _plugins 中移除并销毁 Plugin（析构函数关闭动态库）
+	// 注意：pluginName 指向插件 DLL 静态区，delete self 会 FreeLibrary 卸载该 DLL，
+	// 因此必须先拷贝字符串，卸载后再写日志
+	std::string nameCopy(pluginName);
 	_plugins.erase(it);
 	delete self;
-	WriteLog(LogLevel::Debug, "Plugin [%s] unloaded", pluginName);
+	WriteLog(LogLevel::Debug, "Plugin [%s] unloaded", nameCopy.c_str());
 	return PCH_SUCCESS;
 }
 

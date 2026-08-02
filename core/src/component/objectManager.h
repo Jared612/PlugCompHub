@@ -71,6 +71,7 @@ public:
 	 * @param[in] file 调用方源码文件路径，可为 nullptr。
 	 * @param[in] line 调用方源码行号。
 	 * @return 成功返回对象实例地址；失败返回 nullptr。
+	 * @note initMsg 仅用于初始化投递，由调用方负责释放（消息中心不接管所有权）
 	 */
 	void* createNamedObject(const char* componentID, const char* name, IMessage* initMsg = nullptr, ErrorCode* errCode = nullptr, const char* file = nullptr, int line = 0);
 
@@ -98,6 +99,7 @@ public:
 	 * @param[in] file 调用方源码文件路径，可为 nullptr。
 	 * @param[in] line 调用方源码行号。
 	 * @return 成功返回对象实例地址；失败返回 nullptr。
+	 * @note initMsg 所有权同 createNamedObject：由调用方负责释放
 	 */
 	void* createObject(const char* componentID, IMessage* initMsg = nullptr, ErrorCode* errCode = nullptr, const char* file = nullptr, int line = 0);
 

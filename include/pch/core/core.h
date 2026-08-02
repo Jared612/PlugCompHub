@@ -37,9 +37,9 @@ public:
 	{
 		auto& instance = api::get();
 
-		// 如果对象管理器已存在，返回失败
+		// 幂等：与 core 侧 Initialize 语义一致，重复初始化视为成功
 		if (instance._objectManager)
-			return PCH_FAILED;
+			return PCH_SUCCESS;
 
 		// 从动态库中查找 Initialize 符号，转换为函数指针并保存
 		instance._initializeFunc = (InitializeFunc)__linkto(pchPath, "Initialize");
@@ -62,6 +62,7 @@ public:
 	* @param  file         函数执行的源文件名
 	* @param  line         函数执行的源文件行号
 	* @return 成功返回 void* 指针，失败返回 nullptr（使用 errCode 获取详细错误信息）
+	* @note initMsg 仅作为初始化消息投递，由调用方负责释放（与 sendMessage 不同）
 	*/
 	static inline void *CreateObject(const char *componentID, IMessage* initMsg = nullptr, ErrorCode *errCode = nullptr, const char* file = nullptr, int line = 0)
 	{
@@ -85,6 +86,7 @@ public:
 	* @param  line          函数执行的源文件行号
 	*
 	* @return 成功返回 void* 指针，失败返回 nullptr（名称已存在或内存不足，使用 errCode）
+	* @note initMsg 仅作为初始化消息投递，由调用方负责释放（与 sendMessage 不同）
 	*/
 	static inline void *CreateNamedObject(const char *componentID, const char* objName, IMessage* initMsg = nullptr, ErrorCode *errCode = nullptr, const char* file = nullptr, int line = 0)
 	{

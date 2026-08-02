@@ -2,6 +2,13 @@
  * @file interface.h
  * @brief 面向外部的核心抽象：消息、消息中心、组件/插件/日志/环境管理接口及相关常量
  * @details 在 componentinfo.h 基础上扩展了协议定义和虚接口；在扩展或集成 PCH 时包含此头文件
+ *
+ * ABI 稳定性规则（重要）：
+ * - 已发布的接口类（IMessage / IMessageCenter / IObjectManager / IPluginManager /
+ *   IComponentManager / ILoggerManager / IEnvironment 等）禁止新增/删除虚函数、
+ *   禁止修改已存在函数的签名——任何此类变更都会破坏插件二进制兼容，必须递增
+ *   PCH_ABI_VERSION（见 coreexport.h）并要求插件与 core 同步重编译。
+ * - 跨 DLL 边界只应传递内置类型、同一工具链下的纯虚接口指针和 const char*。
  */
 
 #pragma once
@@ -417,6 +424,8 @@ public:
 	 * @param file 可选的调用方文件名（用于诊断）
 	 * @param line 可选的调用方行号
 	 * @return 成功返回对象指针；失败返回 nullptr
+	 * @note initMsg 仅作为初始化消息投递给对象，消息中心不接管其所有权；
+	 *       调用方负责在创建完成后释放（与 sendMessage 的"中心释放"语义不同）
 	 */
 	virtual void* createNamedObject(const char* componentID, const char* objName, IMessage* initMsg = nullptr, ErrorCode* errCode = nullptr, const char* file = nullptr, int line = 0) = 0;
 	/**
@@ -425,6 +434,7 @@ public:
 	 * @param initMsg 可选的初始化消息
 	 * @param[out] errCode 失败原因，可为 nullptr
 	 * @return 成功返回指针；调用方必须通过 deleteObject 释放（与命名对象不同）
+	 * @note initMsg 所有权同 createNamedObject：由调用方负责释放
 	 */
 	virtual void* createObject(const char* componentID, IMessage* initMsg = nullptr, ErrorCode* errCode = nullptr, const char* file = nullptr, int line = 0) = 0;
 	/**

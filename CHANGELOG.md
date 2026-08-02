@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.2.1] - 2026-08-02
+
+### 新增
+
+- ABI 版本机制：`PCH_ABI_VERSION` + `PluginInfo::abiVersion`，插件加载时校验，
+  不匹配返回 `PCH_PLUGIN_ABI_MISMATCH`
+- 插件卸载回滚测试、并发压力测试（CTest 共 7 项）
+- [docs/RELEASING.md](docs/RELEASING.md) 发布流程、[3rdparty/VERSIONS.md](3rdparty/VERSIONS.md) 依赖版本锁定
+
+### 变更
+
+- `api::Initialize` 重复初始化改为幂等返回 `PCH_SUCCESS`（与 core 侧一致）
+- `initMsg` 所有权明确为调用方负责，公共接口文档统一说明
+- 默认控制台日志增加级别前缀（`[INFO]` 等）
+- 3rdparty 头文件目录标记为 SYSTEM，抑制第三方编译警告
+
+### 修复
+
+- `invokeHandler` 增加组件信息/消息处理器空指针防御
+- `unloadPlugin` 成功卸载后日志仍引用已卸载 DLL 内的插件名指针导致崩溃；
+  改为先拷贝名称再卸载（由新增 plugin_unload 测试捕获）
+
 ## [0.2.0] - 2026-08-02
 
 ### 新增

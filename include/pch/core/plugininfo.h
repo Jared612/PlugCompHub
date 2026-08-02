@@ -5,6 +5,7 @@
  */
 
 #pragma once
+#include <stdint.h>
 #include <functional>
 #include <string>
 #include <atomic>
@@ -19,6 +20,7 @@ struct PluginInfo
 	const char* name;					// 插件名称
 	const char* version;				// 插件版本
 	const char* description;			// 插件描述信息（通常为键值对文本）
+	uint32_t abiVersion;				// 插件编译时的 PCH_ABI_VERSION（core 加载时校验）
 };
 
 /******************************************************************************
@@ -80,7 +82,7 @@ extern "C" __PCH_EXPORT pch::PluginInfo* pluginfo() { \
  *              在主机销毁 ObjectManager 后持有悬空指针
  *****************************************************************************/
 #define PCH_PLUGIN_INFO(key,value) #key":"#value","
-#define PCH_PLUGIN_INFO_END() "\"end\":0 }"};return &pinfo; }\
+#define PCH_PLUGIN_INFO_END() "\"end\":0 }",PCH_ABI_VERSION};return &pinfo; }\
 extern "C" __PCH_EXPORT void pluginit(void* objManager) { \
 struct Priv:public pch::api{static void set(void*p1){Priv*p=(Priv*)&get();p->_objectManager=(pch::IObjectManager*)p1;}};Priv::set(objManager);}\
 extern "C" __PCH_EXPORT void pluginexit() { \
