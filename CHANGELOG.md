@@ -15,6 +15,7 @@
 - `initMsg` 所有权明确为调用方负责，公共接口文档统一说明
 - 默认控制台日志增加级别前缀（`[INFO]` 等）
 - 3rdparty 头文件目录标记为 SYSTEM，抑制第三方编译警告
+- `application` 移入 `plugins/application/`，与其它插件目录统一
 
 ### 修复
 

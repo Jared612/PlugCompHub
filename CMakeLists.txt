@@ -51,10 +51,6 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/plugins/CMakeLists.txt")
 	add_subdirectory(plugins)
 endif()
 
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/application/CMakeLists.txt")
-	add_subdirectory(application)
-endif()
-
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/examples/CMakeLists.txt")
 	add_subdirectory(examples)
 endif()

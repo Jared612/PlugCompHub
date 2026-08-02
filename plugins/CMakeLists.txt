@@ -14,3 +14,7 @@ endif()
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/sqlite/CMakeLists.txt")
 	add_subdirectory(sqlite)
 endif()
+
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/application/CMakeLists.txt")
+	add_subdirectory(application)
+endif()

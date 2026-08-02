@@ -22,8 +22,8 @@ PlugCompHub/
 │   ├── network/   #   网络插件（pchnetwork）
 │   ├── logger/    #   文件日志插件（pchlogger）
 │   ├── sqlite/    #   SQLite 插件（pchsqlite）
-│   └── threadpool/#   线程池插件（pchthreadpool）
-├── application/   # 应用骨架插件（pchapplication）
+│   ├── threadpool/#   线程池插件（pchthreadpool）
+│   └── application/#  应用骨架插件（pchapplication）
 ├── examples/      # 示例程序
 ├── tests/         # CTest 冒烟测试
 ├── docs/          # 功能规范与历史分析
