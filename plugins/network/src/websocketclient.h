@@ -1,14 +1,18 @@
-﻿#pragma once
+/**
+ * @file websocketclient.h
+ * @brief IWebSocketClient 的 Boost.Beast 异步实现
+ */
+#pragma once
 
 #include "network/iwebsocketclient.h"
-#include "httplib.h"
-#include <atomic>
+
 #include <memory>
 #include <mutex>
 #include <string>
-#include <thread>
 
 namespace pch {
+
+struct WsClientSession;
 
 class WebSocketClient : public IWebSocketClient
 {
@@ -24,15 +28,15 @@ public:
 	void close() override;
 
 private:
-	void workerLoop(const std::string& url, ConnectCallback cb);
+	friend struct WsClientSession;
+
+	void notifyMessage(const std::string& msg);
+	void notifyClosed();
 
 	std::mutex _mutex;
-	std::unique_ptr<httplib::ws::WebSocketClient> _ws;
-	std::thread _thread;
-	std::atomic<bool> _running{false};
-
-	MessageCallback _onMessage;
-	CloseCallback   _onClose;
+	std::shared_ptr<WsClientSession> _session; // 当前连接会话（在 io 线程内访问）
+	MessageCallback _msgCb;
+	CloseCallback _closeCb;
 };
 
 }

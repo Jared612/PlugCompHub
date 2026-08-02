@@ -7,7 +7,7 @@ PlugCompHub（简称 PCH）是一个微内核式 C++ 插件组件平台：宿主
 - 插件运行时：`PluginManager` 动态加载/卸载插件，按 `pluginfo` / `pluginit` 约定解析导出符号
 - 组件模型：`ComponentManager` 维护组件注册表，`ObjectManager` 管理具名/匿名对象生命周期
 - 消息中心：同步 `sendMessage`、异步 `postMessage`、组播/广播
-- 可选插件：网络（cpp-httplib HTTP/WebSocket 客户端）、SQLite（含 KV ORM）、线程池、文件日志（spdlog）、应用骨架（TOML 配置驱动）
+- 可选插件：网络（Boost.Asio/Beast HTTP/WebSocket 客户端与服务端）、SQLite（含 KV ORM）、线程池、文件日志（spdlog）、应用骨架（TOML 配置驱动）
 - 公共接口只暴露 `pch::` 接口，第三方库类型不泄露到头文件
 - 公共头统一集中在 `include/pch/`，伞头 `pch.h` 可一键引入核心接口
 - CMake 安装包：`find_package(PCH)` 即可使用

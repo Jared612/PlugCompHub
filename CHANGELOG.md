@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.3.0] - 2026-08-02
+
+### 变更
+
+- 网络插件从 cpp-httplib 重写为 **Boost.Asio + Boost.Beast** 异步实现
+- 新增 HTTP 服务端（`IHttpServer`，组件 `cpp.pch.httpserver`）与
+  WebSocket 服务端（`IWebSocketServer`，组件 `cpp.pch.websocketserver`）
+- 保留 `IHttpClient` / `IWebSocketClient` 公共接口不变（ABI 兼容）
+- 新增命名 Asio 上下文注册表（接口参数 `asioContextName` 复用同一 io_context）
+- 3rdparty 以裁剪头文件版 Boost 1.90 替换 cpp-httplib
+
+### 修复
+
+- 修复跨模块回调返回 `std::string` 导致的静态 CRT 跨堆 free 死锁：
+  服务端请求处理器改为调用方提供输出缓冲（见 DEVELOPMENT.md ABI 规则）
+
 ## [0.2.2] - 2026-08-02
 
 ### 变更
